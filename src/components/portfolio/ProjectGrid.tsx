@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
 
 interface Project {
     id: number;
@@ -22,51 +23,72 @@ const ProjectCard = ({ project, i, range, targetScale, progress }: {
     targetScale: number;
     progress: MotionValue<number>;
 }) => {
+    // Generate predictable random rotation based on ID or index to keep it consistent during renders
+    const rotation = (i % 2 === 0 ? 1 : -1) * (Math.random() * 3 + 1); // Mock random, ideally purely deterministic
+
     const scale = useTransform(progress, range, [1, targetScale]);
+
+    // Create a "slide up" parallax effect for the image inside the card
+    const imageY = useTransform(progress, [0, 1], ["0%", "20%"]);
 
     return (
         <div className="h-screen flex items-center justify-center sticky top-0">
             <motion.div
-                style={{ scale, top: `calc(-5vh + ${i * 25}px)` }}
-                className="relative flex flex-col w-[1000px] h-[600px] rounded-3xl bg-neutral-card border border-white/5 overflow-hidden origin-top shadow-2xl"
+                style={{
+                    scale,
+                    top: `calc(10vh + ${i * 35}px)`,
+                    rotate: `${i % 2 === 0 ? 2 : -2}deg`, // Alternating subtle rotation
+                }}
+                className="relative flex flex-col w-[90vw] md:w-[1200px] h-[70vh] rounded-[2rem] bg-neutral-card overflow-hidden origin-top shadow-2xl border border-white/5"
             >
-                <div className="flex h-full">
-                    {/* Image Section */}
-                    <div className="w-[60%] h-full overflow-hidden">
-                        <Link to={`/projects/${project.id}`} className="block w-full h-full group">
-                            <motion.div className="w-full h-full overflow-hidden">
-                                <img
-                                    src={project.image}
-                                    alt={project.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                />
-                            </motion.div>
-                        </Link>
+                <Link to={`/projects/${project.id}`} className="block w-full h-full relative group cursor-none-ish">
+                    {/* Full Background Image */}
+                    <div className="absolute inset-0 overflow-hidden">
+                        <motion.div style={{ y: imageY }} className="w-full h-[120%] -mt-[10%]">
+                            <img
+                                src={project.image}
+                                alt={project.title}
+                                className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105"
+                            />
+                        </motion.div>
                     </div>
 
-                    {/* Info Section */}
-                    <div className="w-[40%] p-12 flex flex-col justify-between bg-neutral-card">
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+
+                    {/* Content Overlay */}
+                    <div className="absolute inset-x-0 bottom-0 p-8 md:p-16 flex flex-col md:flex-row items-end justify-between gap-8">
                         <div>
-                            <span className="inline-block px-3 py-1 rounded-full border border-white/20 text-xs font-medium text-text-muted mb-6">
-                                {project.category}
-                            </span>
-                            <h2 className="text-4xl font-display font-medium text-white mb-4 leading-tight">
+                            <div className="flex items-center gap-4 mb-6">
+                                <span className="px-4 py-1.5 rounded-full border border-white/30 text-sm font-mono text-white/80 backdrop-blur-md">
+                                    {project.category}
+                                </span>
+                                <span className="text-white/60 font-mono text-sm">
+                                    {project.year}
+                                </span>
+                            </div>
+                            <h2 className="text-5xl md:text-8xl font-display font-medium text-white mb-4 leading-[0.9] tracking-tighter">
                                 {project.title}
                             </h2>
-                            <p className="text-text-muted font-light">
-                                Location: {project.location}<br />
-                                Year: {project.year}
-                            </p>
+                            <div className="flex items-center gap-2 text-white/60">
+                                <span className="w-2 h-2 rounded-full bg-primary" />
+                                <p className="font-sans text-lg tracking-wide uppercase">
+                                    {project.location}
+                                </p>
+                            </div>
                         </div>
 
-                        <Link to={`/projects/${project.id}`}>
-                            <button className="flex items-center gap-4 text-white hover:text-primary transition-colors group">
-                                <span className="text-lg">View Project</span>
-                                <div className="w-12 h-[1px] bg-white group-hover:bg-primary transition-colors" />
-                            </button>
-                        </Link>
+                        <div className="hidden md:block">
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                className="w-24 h-24 rounded-full bg-white text-black flex items-center justify-center group-hover:bg-primary transition-colors duration-300"
+                            >
+                                <ArrowUpRight className="w-10 h-10 transition-transform duration-300 group-hover:rotate-45" />
+                            </motion.button>
+                        </div>
                     </div>
-                </div>
+                </Link>
             </motion.div>
         </div>
     )
@@ -80,13 +102,7 @@ const ProjectGrid: React.FC<ProjectGridProps> = ({ projects }) => {
     });
 
     return (
-        <div ref={container} className="relative mt-[20vh] mb-[20vh] px-4">
-            <div className="max-w-[1000px] mx-auto mb-24">
-                <h2 className="text-6xl md:text-8xl font-display font-medium text-white mb-8">
-                    Featured <br /> <span className="text-text-muted">Works</span>
-                </h2>
-            </div>
-
+        <div ref={container} className="relative mt-[10vh] mb-[10vh] px-4 min-h-[300vh]"> {/* Increased scroll distance */}
             {projects.map((project, i) => {
                 const targetScale = 1 - ((projects.length - i) * 0.05);
                 return (

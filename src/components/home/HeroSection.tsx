@@ -26,8 +26,8 @@ const HeroSection: React.FC = () => {
             <div className="absolute inset-0 z-0">
                 <motion.div style={{ scale: scaleImg }} className="w-full h-full">
                     <img
-                        src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop"
-                        alt="Abstract Architecture"
+                        src="/hero-bg.png"
+                        alt="Architectural visualization"
                         className="w-full h-full object-cover"
                     />
                     <motion.div style={{ opacity: opacityOverlay }} className="absolute inset-0 bg-neutral" />
@@ -41,17 +41,9 @@ const HeroSection: React.FC = () => {
                         initial={{ y: 100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        className="text-[12vw] leading-none font-display font-medium tracking-tighter text-white mix-blend-difference"
-                    >
-                        Unbuilt
-                    </motion.h1>
-                    <motion.h1
-                        initial={{ y: 100, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ duration: 1, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
                         className="text-[12vw] leading-none font-display font-medium tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20"
                     >
-                        Realities
+                        Blackpixel
                     </motion.h1>
 
                     <motion.p
