@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { motion, useScroll, useTransform, MotionValue } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
 
@@ -16,95 +16,18 @@ interface ProjectGridProps {
     projects: Project[];
 }
 
-const SCATTER_POSITIONS = [
-    { top: '10%', left: '10%', rotate: -12 },
-    { top: '60%', left: '70%', rotate: 8 },
-    { top: '15%', left: '65%', rotate: 15 },
-    { top: '70%', left: '5%', rotate: -10 },
-    { top: '40%', left: '80%', rotate: 5 },
-    { top: '10%', left: '40%', rotate: -5 },
-    { top: '80%', left: '40%', rotate: 10 },
-    { top: '30%', left: '0%', rotate: -15 },
-];
-
-const ProjectCard = ({ project, i, total, progress }: {
-    project: Project;
-    i: number;
-    total: number;
-    progress: MotionValue<number>;
-}) => {
-    // Lifecycle Logic:
-    // 0 -> Scatter (Wait)
-    // Start -> Center (Focus)
-    // End -> Top/Gone (Discard)
-
-    // Divide scroll into segments. 
-    // Segment Length.
-    const step = 1 / (total + 1); // +1 buffer
-
-    // Time points
-    const startMove = i * step;      // Starts moving from pile
-    const focusPoint = (i + 1) * step; // Arrives at center
-    const exitPoint = (i + 2) * step;  // Leaves to top
-
-    // Values
-    const scatterPos = SCATTER_POSITIONS[i % SCATTER_POSITIONS.length];
-
-    // Scatter Coords relative to Center (50vw, 50vh)
-    const xScatter = parseFloat(scatterPos.left) - 50;
-    const yScatter = parseFloat(scatterPos.top) - 50;
-    const rotateScatter = `${scatterPos.rotate + (i % 2 ? 3 : -3)}deg`;
-
-    // TRANSFORM RANGES
-    // 1. X/Y Scatter -> Center -> Exit (Up/Down?)
-    // User said: "first page will be moved up, and disappear"
-    // So Y: ScatterY -> 0 -> -150vh
-
-    const range = [startMove, focusPoint, exitPoint];
-
-    // Before startMove, it should just be at scatter.
-    // After exitPoint, it continues to move up or stay gone.
-    // X Movement: Scatter X -> 0 -> 0 (Stay centered while moving UP)
-    const x = useTransform(progress, range, [`${xScatter}vw`, "0vw", "0vw"]);
-
-    // Y Movement: Scatter Y -> 0 -> -120vh (Up and away)
-    const y = useTransform(progress, range, [`${yScatter}vh`, "0vh", "-120vh"]);
-
-    // Rotate: Scatter -> 0 -> 0 (Keep straight when exiting)
-    const rotate = useTransform(progress, range, [rotateScatter, "0deg", "0deg"]);
-
-    // Scale: Smallish -> 1 -> 0.8 (Maybe shrink slightly as it goes up?)
-    const scale = useTransform(progress, range, [0.6, 1, 0.8]);
-
-    // Opacity: Visible -> Visible -> Invisible
-    // Maybe fade out during exit.
-    const opacity = useTransform(progress, [focusPoint, exitPoint], [1, 0]);
-
-    // Content Fade In: Only show text when near center
-    // Fade in from startMove to focusPoint
-    const contentOpacity = useTransform(progress, [startMove + (step * 0.5), focusPoint], [0, 1]);
-
-    // Z-Index: Total - i. So 0 is top (Total), Last is 0.
-    // This allows picking from top of pile.
-
+const ProjectCard = ({ project, className, index }: { project: Project; className?: string, index: number }) => {
     return (
         <motion.div
-            style={{
-                x,
-                y,
-                rotate,
-                scale,
-                opacity: i === total - 1 ? 1 : opacity, // Last card stays visible? Or fades out if needed? 
-                // Let's keep last one visible if we stop scrolling.
-                zIndex: total - i,
-                translateX: "-50%",
-                translateY: "-50%"
-            }}
-            className="absolute top-1/2 left-1/2 w-[80vw] md:w-[60vw] aspect-[16/10] rounded-[2rem] bg-neutral-card overflow-hidden shadow-2xl border border-white/5 origin-center pointer-events-auto"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-10%" }}
+            transition={{ duration: 0.8, delay: index * 0.1, ease: [0.215, 0.61, 0.355, 1] }}
+            className={`group relative block overflow-hidden bg-neutral-card rounded-[2rem] ${className}`}
         >
-            <Link to={`/projects/${project.id}`} className="block w-full h-full relative group">
-                {/* Full Background Image */}
-                <div className="absolute inset-0 overflow-hidden">
+            <Link to={`/projects/${project.id}`} className="block w-full h-full cursor-none-ish">
+                {/* Image - Slight scale on hover */}
+                <div className="absolute inset-0 transition-transform duration-1000 ease-out group-hover:scale-105">
                     <img
                         src={project.image}
                         alt={project.title}
@@ -112,62 +35,77 @@ const ProjectCard = ({ project, i, total, progress }: {
                     />
                 </div>
 
-                {/* Gradient OVerlays */}
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-80" />
+                {/* Overlay - Gradient always present, visible details on hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                {/* Content Overlay */}
-                <motion.div
-                    style={{ opacity: contentOpacity }}
-                    className="absolute inset-x-0 bottom-0 p-8 md:p-12 flex flex-col justify-end"
-                >
-                    <div className="flex items-center justify-between items-end">
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="px-3 py-1 rounded-full border border-white/30 text-xs font-mono text-white/80 backdrop-blur-md">
-                                    {project.category}
-                                </span>
-                            </div>
-                            <h2 className="text-4xl md:text-7xl font-display font-medium text-white mb-2 leading-[0.9] tracking-tighter">
-                                {project.title}
-                            </h2>
-                            <p className="font-sans text-sm md:text-lg tracking-wide uppercase text-white/60">
+                {/* Content Container */}
+                <div className="absolute inset-x-0 bottom-0 p-8 md:p-12 flex flex-col justify-end">
+                    <div className="transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500 ease-out">
+                        <span className="inline-block px-3 py-1 mb-4 rounded-full border border-white/30 text-xs font-mono text-white/80 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+                            {project.category}
+                        </span>
+                        <h2 className="text-3xl md:text-5xl font-display font-medium text-white mb-2 leading-[0.9] tracking-tighter">
+                            {project.title}
+                        </h2>
+                        <div className="flex items-center justify-between mt-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200">
+                            <p className="font-sans text-sm tracking-wide uppercase text-white/60">
                                 {project.location} • {project.year}
                             </p>
-                        </div>
-
-                        <div className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center group-hover:scale-110 transition-transform cursor-pointer">
-                            <ArrowUpRight className="w-6 h-6" />
+                            <div className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300">
+                                <ArrowUpRight className="w-5 h-5" />
+                            </div>
                         </div>
                     </div>
-                </motion.div>
+                </div>
             </Link>
         </motion.div>
-    )
-}
+    );
+};
 
 const ProjectGrid: React.FC<ProjectGridProps> = ({ projects }) => {
-    const container = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: container,
-        offset: ['start start', 'end end']
-    });
+
+    // Helper to determine layout class based on index
+    // Revised to eliminate gaps by pairing items
+    const getLayoutStyles = (index: number) => {
+        const patternIndex = index % 6;
+
+        switch (patternIndex) {
+            case 0: // Hero - Full Width
+                return "col-span-1 md:col-span-12 aspect-[16/9]";
+
+            case 1: // Asymmetric Left (Wide)
+                return "col-span-1 md:col-span-8 aspect-[16/10]";
+
+            case 2: // Asymmetric Right (Narrow) - Indented slightly
+                // Fits next to the 8-col item (12-8=4) but let's give it 4 cols.
+                return "col-span-1 md:col-span-4 aspect-[3/4] md:mt-12"; // Offset for style
+
+            case 3: // Full Width Slim
+                return "col-span-1 md:col-span-12 aspect-[21/9]";
+
+            case 4: // Half Left
+                return "col-span-1 md:col-span-6 aspect-[4/3]";
+
+            case 5: // Half Right
+                return "col-span-1 md:col-span-6 aspect-[4/3] md:mt-24"; // Offset for style
+
+            default:
+                return "col-span-1 md:col-span-12 aspect-[16/9]";
+        }
+    };
 
     return (
-        <div ref={container} className="relative h-[600vh] bg-neutral">
-            {/* Sticky Viewport */}
-            <div className="sticky top-0 h-screen w-full overflow-hidden perspective-1000">
-                {projects.map((project, i) => {
-                    return (
-                        <ProjectCard
-                            key={project.id}
-                            i={i}
-                            total={projects.length}
-                            project={project}
-                            progress={scrollYProgress}
-                        />
-                    );
-                })}
+        <div className="w-full px-4 md:px-8 bg-neutral min-h-screen pb-32">
+            <div className="max-w-[1800px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
+                {projects.map((project, i) => (
+                    <ProjectCard
+                        key={project.id}
+                        project={project}
+                        index={i}
+                        className={getLayoutStyles(i)}
+                    />
+                ))}
             </div>
         </div>
     );
