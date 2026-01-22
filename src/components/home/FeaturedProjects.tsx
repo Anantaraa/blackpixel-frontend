@@ -1,5 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { useProjects } from '../../hooks/useProjects';
 import type { Project } from '../../hooks/useProjects';
 import ProjectLightbox from './ProjectLightbox';
@@ -40,6 +39,30 @@ const FeaturedProjects: React.FC = () => {
         setSelectedProject(projects[prevIndex]);
     };
 
+    // Masonry Column Calculation
+    const [columns, setColumns] = useState<Project[][]>([]);
+
+    useEffect(() => {
+        const calculateColumns = () => {
+            const width = window.innerWidth;
+            let numCols = 1;
+            if (width >= 1024) numCols = 5;      // lg
+            else if (width >= 768) numCols = 3;  // md
+            else if (width >= 640) numCols = 2;  // sm
+
+            // Distribute projects
+            const newCols: Project[][] = Array.from({ length: numCols }, () => []);
+            projects.forEach((project, i) => {
+                newCols[i % numCols].push(project);
+            });
+            setColumns(newCols);
+        };
+
+        calculateColumns();
+        window.addEventListener('resize', calculateColumns);
+        return () => window.removeEventListener('resize', calculateColumns);
+    }, [projects]);
+
     if (loading && projects.length === 0) {
         return <div className="py-20 text-center text-white">Loading Projects...</div>;
     }
@@ -52,15 +75,18 @@ const FeaturedProjects: React.FC = () => {
                 </h2>
             </div>
 
-            {/* Masonry Layout - 5 Columns */}
-            <div className="w-full px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-5 gap-4 space-y-4">
-                {projects.map((project, index) => (
-                    <ProjectItem
-                        key={project.id}
-                        project={project}
-                        index={index}
-                        onClick={() => openLightbox(project)}
-                    />
+            {/* Masonry Layout - JS Distributed for Horizontal Ordering */}
+            <div className="w-full px-4 flex gap-2 items-start">
+                {columns.map((col, colIndex) => (
+                    <div key={colIndex} className="flex flex-col gap-2 flex-1">
+                        {col.map((project) => (
+                            <ProjectItem
+                                key={project.id}
+                                project={project}
+                                onClick={() => openLightbox(project)}
+                            />
+                        ))}
+                    </div>
                 ))}
             </div>
 
@@ -77,13 +103,13 @@ const FeaturedProjects: React.FC = () => {
 
 // Separate component to handle per-item scroll parallax logic
 // Separate component to handle per-item scroll parallax logic
-const ProjectItem: React.FC<{ project: any, index: number, onClick: () => void }> = ({ project, index, onClick }) => {
+const ProjectItem: React.FC<{ project: any, onClick: () => void }> = ({ project, onClick }) => {
     // Parallax removed to ensure 100% image visibility (no cropping) as requested.
     // Standard Masonry behavior: Width fits column, Height is dynamic based on aspect ratio.
 
     return (
         <div
-            className="break-inside-avoid mb-4 group relative overflow-hidden cursor-pointer rounded-lg" // Removed bg-neutral-900
+            className="break-inside-avoid group relative overflow-hidden cursor-pointer rounded-lg" // Removed bg-neutral-900 and mb-4
             onClick={onClick}
         >
             {/* Image Container */}
