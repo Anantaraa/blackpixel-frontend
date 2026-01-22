@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-neutral text-white pt-32 pb-8 border-t border-white/10">
+        <footer className="bg-neutral text-white pt-32 pb-8">
             <div className="container mx-auto px-6 md:px-12">
 
                 {/* Large CTA Section */}

@@ -83,7 +83,7 @@ const ProjectItem: React.FC<{ project: any, index: number, onClick: () => void }
 
     return (
         <div
-            className="break-inside-avoid mb-4 group relative overflow-hidden cursor-pointer bg-neutral-900 rounded-lg"
+            className="break-inside-avoid mb-4 group relative overflow-hidden cursor-pointer rounded-lg" // Removed bg-neutral-900
             onClick={onClick}
         >
             {/* Image Container */}
@@ -99,7 +99,7 @@ const ProjectItem: React.FC<{ project: any, index: number, onClick: () => void }
             {/* Hover Overlay */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500 z-10">
                 <div className="absolute bottom-6 left-6 right-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100">
-                    <span className="inline-block px-2 py-1 mb-2 text-[10px] border border-white/50 rounded-full text-white/90 uppercase tracking-widest backdrop-blur-sm shadow-sm">
+                    <span className="inline-block px-2 py-1 mb-2 text-[10px] bg-white/10 backdrop-blur-md rounded-full text-white/90 uppercase tracking-widest shadow-sm">
                         {project.categories?.name || 'Project'}
                     </span>
                     <h3 className="text-xl font-display font-medium text-white leading-tight drop-shadow-md">

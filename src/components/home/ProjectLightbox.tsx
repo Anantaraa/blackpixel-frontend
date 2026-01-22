@@ -48,12 +48,26 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, isOpen, onCl
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm p-4 md:p-12"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm p-4 md:p-8"
                     onClick={onClose} // Close when clicking backdrop
                 >
+                    {/* External Navigation Arrows */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onPrev(); }}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 text-white/50 hover:text-white transition-colors hover:scale-110"
+                    >
+                        <ChevronLeft size={48} />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onNext(); }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 text-white/50 hover:text-white transition-colors hover:scale-110"
+                    >
+                        <ChevronRight size={48} />
+                    </button>
+
                     {/* Content Container */}
                     <div
-                        className="relative w-full h-full max-w-7xl mx-auto flex flex-col md:flex-row bg-neutral-900 overflow-hidden rounded-lg shadow-2xl"
+                        className="relative w-full h-[90vh] max-w-[95vw] mx-auto flex flex-col md:flex-row bg-neutral-900 overflow-hidden rounded-lg shadow-2xl"
                         onClick={(e) => e.stopPropagation()} // Prevent close on content click
                     >
                         {/* Close Button */}
@@ -64,21 +78,9 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, isOpen, onCl
                             <X size={24} />
                         </button>
 
-                        {/* Image Section - Takes up full width on mobile, large portion on desktop */}
-                        <div className="w-full md:w-3/4 h-1/2 md:h-full relative bg-black">
-                            {/* Navigation Arrows (Overlay on Image) */}
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onPrev(); }}
-                                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full transition-all backdrop-blur-md hover:scale-110"
-                            >
-                                <ChevronLeft size={32} />
-                            </button>
-                            <button
-                                onClick={(e) => { e.stopPropagation(); onNext(); }}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3 bg-black/20 hover:bg-black/50 text-white rounded-full transition-all backdrop-blur-md hover:scale-110"
-                            >
-                                <ChevronRight size={32} />
-                            </button>
+                        {/* Image Section - Flexible width (Grow) */}
+                        <div className="flex-1 h-1/2 md:h-full relative bg-black">
+                            {/* Arrows removed from here */}
 
                             <motion.img
                                 key={project.id} // Re-render image on project change
@@ -91,12 +93,11 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, isOpen, onCl
                             />
                         </div>
 
-                        {/* Details Section - Sidebar on desktop, bottom on mobile */}
-                        <div className="w-full md:w-1/4 h-1/2 md:h-full bg-neutral-900 border-l border-white/10 p-8 flex flex-col overflow-y-auto">
+                        <div className="w-full md:w-[400px] h-1/2 md:h-full bg-neutral-900 border-l border-white/10 p-8 flex flex-col overflow-y-auto shrink-0">
 
 
                             <div className="mt-auto md:mt-0 mb-8">
-                                <span className="inline-block px-3 py-1 mb-4 text-xs border border-white/20 rounded-full text-white/60 uppercase tracking-widest">
+                                <span className="inline-block px-3 py-1 mb-4 text-xs bg-white/10 rounded-full text-white/60 uppercase tracking-widest">
                                     {project.categories?.name || 'Project'}
                                 </span>
                                 <h2 className="text-3xl md:text-4xl font-display font-medium text-white mb-2 leading-tight">
@@ -116,7 +117,7 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, isOpen, onCl
                             )}
 
                             {/* Pagination Numbers */}
-                            <div className="mt-auto pt-8 border-t border-white/10 flex justify-between text-white/30 font-mono text-sm">
+                            <div className="mt-auto pt-8 flex justify-between text-white/30 font-mono text-sm">
                                 <span>Project Details</span>
                                 <span>{project.year}</span>
                             </div>
