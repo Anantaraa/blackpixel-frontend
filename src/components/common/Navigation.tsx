@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 const Navigation: React.FC = () => {
 
     const links = [
-        { name: 'Projects', path: '/projects' },
         { name: 'Services', path: '/services' },
         { name: 'Studio', path: '/about' },
         { name: 'Contact', path: '/contact' },

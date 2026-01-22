@@ -1,92 +1,114 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { PROJECTS } from '../../data/mockData';
-import Button from '../common/Button';
-import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { useProjects } from '../../hooks/useProjects';
+import type { Project } from '../../hooks/useProjects';
+import ProjectLightbox from './ProjectLightbox';
 
 const FeaturedProjects: React.FC = () => {
-    const featured = PROJECTS.slice(0, 8); // Display 8 projects
+    const { projects, loading } = useProjects();
+
+    // Filter only featured projects if needed, or show all. 
+    // User said "incremental height based on number of projects uploaded which are featured".
+    // Let's assume we show ALL projects that are marked 'featured' in DB.
+    // Or just all projects if 'featured' flag isn't strictly used yet. 
+    // The Admin panel allows setting 'featured'. Let's trust the DB sort.
+
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+
+    const openLightbox = (project: Project) => {
+        setSelectedProject(project);
+        setIsLightboxOpen(true);
+    };
+
+    const closeLightbox = () => {
+        setIsLightboxOpen(false);
+        setTimeout(() => setSelectedProject(null), 300);
+    };
+
+    const handleNext = () => {
+        if (!selectedProject) return;
+        const currentIndex = projects.findIndex(p => p.id === selectedProject.id);
+        const nextIndex = (currentIndex + 1) % projects.length;
+        setSelectedProject(projects[nextIndex]);
+    };
+
+    const handlePrev = () => {
+        if (!selectedProject) return;
+        const currentIndex = projects.findIndex(p => p.id === selectedProject.id);
+        const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
+        setSelectedProject(projects[prevIndex]);
+    };
+
+    if (loading && projects.length === 0) {
+        return <div className="py-20 text-center text-white">Loading Projects...</div>;
+    }
 
     return (
-        <section className="py-32 bg-neutral text-white">
-            <div className="container mx-auto px-4 md:px-8">
-                <div className="flex flex-col md:flex-row justify-between items-end mb-24">
-                    <h2 className="text-6xl md:text-9xl font-display font-medium uppercase leading-[0.8] tracking-tighter mix-blend-difference">
-                        Selected <br /> <span className="text-white/40">Works</span>
-                    </h2>
-                    <Link to="/projects">
-                        <Button variant="outline" className="hidden md:inline-flex rounded-full border-white/20 text-white hover:bg-white hover:text-black uppercase tracking-widest px-8">All Projects</Button>
-                    </Link>
-                </div>
-
-                {/* Creative Grid: Alternating Layouts */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[500px]">
-                    {featured.map((project, index) => {
-                        // Creative spanning logic
-                        const isLarge = index === 0 || index === 5;
-                        const isTall = index === 2 || index === 6;
-                        const isWide = index === 3;
-
-                        let spanClass = "md:col-span-1";
-                        if (isLarge) spanClass = "md:col-span-2 md:row-span-2";
-                        else if (isWide) spanClass = "md:col-span-2";
-                        else if (isTall) spanClass = "md:col-span-1 md:row-span-2";
-
-                        return (
-                            <motion.div
-                                key={project.id}
-                                initial={{ opacity: 0, y: 50 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-50px" }}
-                                transition={{ delay: index * 0.1, duration: 0.6 }}
-                                className={cn(spanClass, "relative group overflow-hidden rounded-2xl bg-neutral-card border border-white/5 cursor-pointer")}
-                            >
-                                <Link to={`/projects/${project.id}`} className="block w-full h-full">
-                                    <div className="w-full h-full relative">
-                                        <img
-                                            src={project.image}
-                                            alt={project.title}
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                        />
-
-                                        {/* Hover Overlay - Details at Bottom */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-8">
-                                            <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                                <div className="flex justify-between items-end">
-                                                    <div>
-                                                        <span className="inline-block px-3 py-1 mb-3 text-xs border border-white/30 rounded-full text-white/80 uppercase tracking-wider backdrop-blur-md">
-                                                            {project.category}
-                                                        </span>
-                                                        <h3 className="text-3xl font-display font-medium leading-none text-white">
-                                                            {project.title}
-                                                        </h3>
-                                                        <p className="text-white/60 text-sm mt-2 font-mono">
-                                                            {project.location} • {project.year}
-                                                        </p>
-                                                    </div>
-                                                    <div className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center transform rotate-45 group-hover:rotate-0 transition-transform duration-300">
-                                                        <ArrowUpRight size={24} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Link>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-
-                <div className="mt-24 text-center md:hidden">
-                    <Link to="/projects">
-                        <Button variant="outline" className="w-full rounded-full border-white text-white uppercase tracking-widest">All Projects</Button>
-                    </Link>
-                </div>
+        <section className="bg-neutral text-white" id="projects">
+            <div className="py-20 mb-8 text-center bg-neutral">
+                <h2 className="text-4xl md:text-6xl font-display font-medium uppercase tracking-tight">
+                    Selected Works
+                </h2>
             </div>
+
+            {/* Masonry Layout - 5 Columns */}
+            <div className="w-full px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-5 gap-4 space-y-4">
+                {projects.map((project, index) => (
+                    <ProjectItem
+                        key={project.id}
+                        project={project}
+                        index={index}
+                        onClick={() => openLightbox(project)}
+                    />
+                ))}
+            </div>
+
+            <ProjectLightbox
+                project={selectedProject as any} // Temporary cast until Lightbox is updated
+                isOpen={isLightboxOpen}
+                onClose={closeLightbox}
+                onNext={handleNext}
+                onPrev={handlePrev}
+            />
         </section>
     );
 };
+
+// Separate component to handle per-item scroll parallax logic
+// Separate component to handle per-item scroll parallax logic
+const ProjectItem: React.FC<{ project: any, index: number, onClick: () => void }> = ({ project, index, onClick }) => {
+    // Parallax removed to ensure 100% image visibility (no cropping) as requested.
+    // Standard Masonry behavior: Width fits column, Height is dynamic based on aspect ratio.
+
+    return (
+        <div
+            className="break-inside-avoid mb-4 group relative overflow-hidden cursor-pointer bg-neutral-900 rounded-lg"
+            onClick={onClick}
+        >
+            {/* Image Container */}
+            <div className="relative w-full h-auto">
+                <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02] will-change-transform"
+                    loading="lazy"
+                />
+            </div>
+
+            {/* Hover Overlay */}
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500 z-10">
+                <div className="absolute bottom-6 left-6 right-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100">
+                    <span className="inline-block px-2 py-1 mb-2 text-[10px] border border-white/50 rounded-full text-white/90 uppercase tracking-widest backdrop-blur-sm shadow-sm">
+                        {project.categories?.name || 'Project'}
+                    </span>
+                    <h3 className="text-xl font-display font-medium text-white leading-tight drop-shadow-md">
+                        {project.title}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default FeaturedProjects;
