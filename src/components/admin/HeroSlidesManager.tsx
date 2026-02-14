@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHeroSlides } from '../../hooks/useHeroSlides';
 import { uploadToCloudinary } from '../../utils/cloudinary';
-import { Trash2, Plus, Upload } from 'lucide-react';
+import { Trash2, Plus } from 'lucide-react';
 
 export const HeroSlidesManager: React.FC = () => {
     const { slides, loading, error, addSlide, deleteSlide, refresh } = useHeroSlides();
