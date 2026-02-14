@@ -12,8 +12,8 @@ const Home: React.FC = () => {
 
             <main className="flex-grow">
                 <HeroSection />
-                <ServicesOverview />
                 <FeaturedProjects />
+                <ServicesOverview />
             </main>
 
             <Footer />

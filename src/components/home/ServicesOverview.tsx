@@ -68,10 +68,12 @@ const ServicesOverview: React.FC = () => {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="md:pl-[88px] block group-hover:hidden transition-all duration-500 px-4">
-                                        <p className="text-text-muted/50 max-w-md line-clamp-1">
-                                            {service.description}
-                                        </p>
+                                    <div className="md:pl-[88px] grid grid-rows-[1fr] group-hover:grid-rows-[0fr] overflow-hidden transition-all duration-500 px-4 group-hover:opacity-0">
+                                        <div className="min-h-0">
+                                            <p className="text-text-muted/50 max-w-md line-clamp-1">
+                                                {service.description}
+                                            </p>
+                                        </div>
                                     </div>
 
                                     {/* Hover Highlight Line */}
