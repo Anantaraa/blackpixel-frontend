@@ -38,7 +38,7 @@ const HeroSection: React.FC = () => {
                         initial={{ y: 100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        className="text-[12vw] leading-none font-display font-medium tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-text to-text/20 pb-4"
+                        className="text-[12vw] leading-none font-display font-medium tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20 pb-4"
                     >
                         Blackpixel
                     </motion.h1>
@@ -47,7 +47,9 @@ const HeroSection: React.FC = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 1, duration: 1 }}
-                        className="mt-8 text-xl text-text-muted max-w-xl mx-auto font-light"
+                        // Using text-white/60 for a transparent white look in both modes.
+                        // Removed mix-blend-difference as requested for "white transparent".
+                        className="mt-8 text-xl text-white/60 max-w-xl mx-auto font-light"
                     >
                         We craft digital atmospheres that blur the line between the imagined and the real.
                     </motion.p>
