@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjects } from '../hooks/useProjects';
-import type { Project } from '../hooks/useProjects';
+import type { Project, ProjectImage } from '../hooks/useProjects';
 import { uploadToCloudinary } from '../utils/cloudinary';
 import { supabase } from '../utils/supabase';
 import { HeroSlidesManager } from '../components/admin/HeroSlidesManager';
@@ -22,7 +22,7 @@ const Admin = () => {
         description: '',
         featured: false,
         display_order: 0,
-        gallery: [] as string[] // simplified for now
+        gallery: [] as ProjectImage[]
     };
     const [formData, setFormData] = useState(initialForm);
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -59,6 +59,62 @@ const Admin = () => {
         } finally {
             setIsUploading(false);
         }
+    };
+
+    // Helper to toggle featured status of a gallery image
+    const toggleFeaturedImage = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            gallery: prev.gallery.map((img, i) =>
+                i === index ? { ...img, featured: !img.featured } : img
+            )
+        }));
+    };
+
+    const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        console.log('Starting gallery upload with files:', files);
+
+        try {
+            setIsUploading(true);
+            const newImages: { url: string; featured: boolean }[] = [];
+            for (let i = 0; i < files.length; i++) {
+                console.log(`Uploading file ${i}...`);
+                const url = await uploadToCloudinary(files[i]);
+                console.log(`File ${i} uploaded. URL:`, url);
+
+                if (!url) {
+                    console.error(`Upload returned empty URL for file ${i}`);
+                    continue;
+                }
+
+                newImages.push({ url, featured: false });
+            }
+            console.log('New images to add:', newImages);
+            setFormData(prev => {
+                const updated = { ...prev, gallery: [...prev.gallery, ...newImages] };
+                console.log('Updated formData gallery:', updated.gallery);
+                return updated;
+            });
+        } catch (err: any) {
+            console.error('Gallery Upload error:', err);
+            alert('Gallery Upload failed: ' + err.message);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const removeGalleryImage = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            gallery: prev.gallery.filter((_, i) => i !== index)
+        }));
+    };
+
+    const setMainImage = (url: string) => {
+        setFormData(prev => ({ ...prev, image: url }));
     };
 
     const handleEdit = (project: Project) => {
@@ -114,8 +170,8 @@ const Admin = () => {
                     <button
                         onClick={() => setActiveTab('projects')}
                         className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'projects'
-                                ? 'bg-white text-black shadow-sm'
-                                : 'text-gray-500 hover:text-black'
+                            ? 'bg-white text-black shadow-sm'
+                            : 'text-gray-500 hover:text-black'
                             }`}
                     >
                         Projects
@@ -123,8 +179,8 @@ const Admin = () => {
                     <button
                         onClick={() => setActiveTab('hero')}
                         className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'hero'
-                                ? 'bg-white text-black shadow-sm'
-                                : 'text-gray-500 hover:text-black'
+                            ? 'bg-white text-black shadow-sm'
+                            : 'text-gray-500 hover:text-black'
                             }`}
                     >
                         Hero Slides
@@ -151,7 +207,7 @@ const Admin = () => {
                             <table className="w-full border-collapse">
                                 <thead>
                                     <tr className="bg-gray-100 text-left">
-                                        <th className="p-4 border-b">Image</th>
+                                        <th className="p-4 border-b">Image Group</th>
                                         <th className="p-4 border-b">Title</th>
                                         <th className="p-4 border-b">Order</th>
                                         <th className="p-4 border-b">Category</th>
@@ -163,7 +219,22 @@ const Admin = () => {
                                     {projects.map((project) => (
                                         <tr key={project.id} className="border-b hover:bg-gray-50">
                                             <td className="p-4">
-                                                <img src={project.image} alt={project.title} className="w-16 h-16 object-cover rounded" />
+                                                <div className="flex -space-x-4">
+                                                    <img src={project.image} alt={project.title} className="w-16 h-16 object-cover rounded border-2 border-white relative z-10" />
+                                                    {project.gallery?.slice(0, 3).map((img, i) => (
+                                                        <div key={i} className="relative" style={{ zIndex: 9 - i }}>
+                                                            <img src={img.url} alt="" className="w-16 h-16 object-cover rounded border-2 border-white" />
+                                                            {img.featured && (
+                                                                <div className="absolute top-0 right-0 w-3 h-3 bg-yellow-400 rounded-full border border-white" title="Featured Image"></div>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                    {(project.gallery?.length || 0) > 3 && (
+                                                        <div className="w-16 h-16 rounded bg-gray-200 border-2 border-white flex items-center justify-center text-xs font-bold relative z-0">
+                                                            +{project.gallery.length - 3}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="p-4 font-medium">{project.title} {project.featured && '⭐'}</td>
                                             <td className="p-4 font-mono">{project.display_order}</td>
@@ -255,33 +326,100 @@ const Admin = () => {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Main Image</label>
+                                <div className="border-t pt-4 mt-4">
+                                    <h3 className="font-bold mb-4">Project Imagery</h3>
 
-                                    {/* Image Preview */}
-                                    {formData.image && (
-                                        <div className="mb-2">
-                                            <img src={formData.image} alt="Preview" className="w-32 h-20 object-cover rounded border" />
+                                    {/* Main Image */}
+                                    <div className="mb-6">
+                                        <label className="block text-sm font-medium mb-2">Main Image (Cover)</label>
+                                        <div className="flex items-start gap-4">
+                                            {formData.image && (
+                                                <div className="relative group">
+                                                    <img src={formData.image} alt="Main" className="w-32 h-20 object-cover rounded border" />
+                                                </div>
+                                            )}
+                                            <div className="flex-1">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageUpload}
+                                                    className="block w-full text-sm text-slate-500
+                                                        file:mr-4 file:py-2 file:px-4
+                                                        file:rounded-full file:border-0
+                                                        file:text-sm file:font-semibold
+                                                        file:bg-violet-50 file:text-violet-700
+                                                        hover:file:bg-violet-100"
+                                                    disabled={isUploading}
+                                                />
+                                            </div>
                                         </div>
-                                    )}
+                                    </div>
 
-                                    <div className="flex flex-col gap-2">
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleImageUpload}
-                                            className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
-                                            disabled={isUploading}
-                                        />
-                                        {isUploading && <span className="text-sm text-blue-600">Uploading...</span>}
+                                    {/* Gallery */}
+                                    <div>
+                                        <label className="block text-sm font-medium mb-2">Gallery Images (Multiple)</label>
 
-                                        <input
-                                            type="url"
-                                            placeholder="Or paste image URL"
-                                            className="w-full border p-2 rounded text-sm"
-                                            value={formData.image}
-                                            onChange={e => setFormData({ ...formData, image: e.target.value })}
-                                        />
+                                        {/* Gallery Grid */}
+                                        <div className="grid grid-cols-3 gap-2 mb-4">
+                                            {formData.gallery.map((img, index) => {
+                                                return (
+                                                    <div key={index} className="relative group aspect-video bg-gray-100 rounded overflow-hidden">
+                                                        <img src={img.url} alt={`Gallery ${index}`} className="w-full h-full object-cover" />
+
+                                                        {/* Featured Badge */}
+                                                        {img.featured && (
+                                                            <div className="absolute top-2 right-2 bg-yellow-400 text-black text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow z-10">
+                                                                Featured
+                                                            </div>
+                                                        )}
+
+                                                        {/* Actions Overlay */}
+                                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setMainImage(img.url)}
+                                                                    className="text-xs bg-white text-black px-2 py-1 rounded hover:bg-gray-200"
+                                                                >
+                                                                    Main
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => toggleFeaturedImage(index)}
+                                                                    className={`text-xs px-2 py-1 rounded ${img.featured
+                                                                        ? 'bg-yellow-400 text-black hover:bg-yellow-500'
+                                                                        : 'bg-gray-600 text-white hover:bg-gray-500'
+                                                                        }`}
+                                                                >
+                                                                    {img.featured ? 'Unfeature' : 'Feature'}
+                                                                </button>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeGalleryImage(index)}
+                                                                className="text-xs bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700"
+                                                            >
+                                                                Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+
+                                            {/* Add New Button */}
+                                            <label className="border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 aspect-video">
+                                                <span className="text-2xl text-gray-400">+</span>
+                                                <span className="text-xs text-gray-500">Add Images</span>
+                                                <input
+                                                    type="file"
+                                                    multiple
+                                                    accept="image/*"
+                                                    onChange={handleGalleryUpload}
+                                                    className="hidden"
+                                                    disabled={isUploading}
+                                                />
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 

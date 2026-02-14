@@ -39,21 +39,70 @@ const FeaturedProjects: React.FC = () => {
         setSelectedProject(projects[prevIndex]);
     };
 
+    // Flatten projects into a list of "Featured Items"
+    // Each item represents an image to be displayed.
+    // Logic:
+    // 1. If project.featured is true -> Include Main Image
+    // 2. Include any gallery image where img.featured is true
+    interface DisplayItem {
+        id: string; // unique combo
+        project: Project;
+        imageUrl: string;
+        isMain: boolean;
+    }
+
+    const [displayItems, setDisplayItems] = useState<DisplayItem[]>([]);
+
+    useEffect(() => {
+        const items: DisplayItem[] = [];
+        projects.forEach(p => {
+            // Main Image
+            if (p.featured && p.image) {
+                items.push({
+                    id: `${p.id}-main`,
+                    project: p,
+                    imageUrl: p.image,
+                    isMain: true
+                });
+            }
+            // Gallery Images
+            if (p.gallery && Array.isArray(p.gallery)) {
+                p.gallery.forEach((img, idx) => {
+                    // Check if img has featured property (normalized in useProjects)
+                    if (img.featured) {
+                        items.push({
+                            id: `${p.id}-gallery-${idx}`,
+                            project: p,
+                            imageUrl: img.url,
+                            isMain: false
+                        });
+                    }
+                });
+            }
+        });
+
+        // Sort items? For now, keep project order, then main, then gallery.
+        // Or specific shuffle? User didn't request shuffle.
+        // Re-sorting by project display_order is implicit since projects are sorted.
+        setDisplayItems(items);
+    }, [projects]);
+
+
     // Masonry Column Calculation
-    const [columns, setColumns] = useState<Project[][]>([]);
+    const [columns, setColumns] = useState<DisplayItem[][]>([]);
 
     useEffect(() => {
         const calculateColumns = () => {
             const width = window.innerWidth;
             let numCols = 1;
-            if (width >= 1024) numCols = 5;      // lg
+            if (width >= 1024) numCols = 4;      // Reduced from 5 to 4 to give images more room if we have many.
             else if (width >= 768) numCols = 3;  // md
             else if (width >= 640) numCols = 2;  // sm
 
-            // Distribute projects
-            const newCols: Project[][] = Array.from({ length: numCols }, () => []);
-            projects.forEach((project, i) => {
-                newCols[i % numCols].push(project);
+            // Distribute items
+            const newCols: DisplayItem[][] = Array.from({ length: numCols }, () => []);
+            displayItems.forEach((item, i) => {
+                newCols[i % numCols].push(item);
             });
             setColumns(newCols);
         };
@@ -61,7 +110,7 @@ const FeaturedProjects: React.FC = () => {
         calculateColumns();
         window.addEventListener('resize', calculateColumns);
         return () => window.removeEventListener('resize', calculateColumns);
-    }, [projects]);
+    }, [displayItems]);
 
     if (loading && projects.length === 0) {
         return <div className="py-20 text-center text-text">Loading Projects...</div>;
@@ -75,15 +124,16 @@ const FeaturedProjects: React.FC = () => {
                 </h2>
             </div>
 
-            {/* Masonry Layout - JS Distributed for Horizontal Ordering */}
+            {/* Masonry Layout */}
             <div className="w-full px-4 flex gap-2 items-start">
                 {columns.map((col, colIndex) => (
                     <div key={colIndex} className="flex flex-col gap-2 flex-1">
-                        {col.map((project) => (
+                        {col.map((item) => (
                             <ProjectItem
-                                key={project.id}
-                                project={project}
-                                onClick={() => openLightbox(project)}
+                                key={item.id}
+                                project={item.project} // Pass project for title/category
+                                imageUrl={item.imageUrl} // Pass specific image
+                                onClick={() => openLightbox(item.project)} // Lightbox opens project context
                             />
                         ))}
                     </div>
@@ -103,7 +153,7 @@ const FeaturedProjects: React.FC = () => {
 
 // Separate component to handle per-item scroll parallax logic
 // Separate component to handle per-item scroll parallax logic
-const ProjectItem: React.FC<{ project: any, onClick: () => void }> = ({ project, onClick }) => {
+const ProjectItem: React.FC<{ project: any, imageUrl: string, onClick: () => void }> = ({ project, imageUrl, onClick }) => {
     // Parallax removed to ensure 100% image visibility (no cropping) as requested.
     // Standard Masonry behavior: Width fits column, Height is dynamic based on aspect ratio.
 
@@ -115,7 +165,7 @@ const ProjectItem: React.FC<{ project: any, onClick: () => void }> = ({ project,
             {/* Image Container */}
             <div className="relative w-full h-auto">
                 <img
-                    src={project.image}
+                    src={imageUrl}
                     alt={project.title}
                     className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02] will-change-transform"
                     loading="lazy"

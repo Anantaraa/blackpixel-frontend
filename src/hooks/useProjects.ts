@@ -7,6 +7,11 @@ export interface Category {
     slug: string;
 }
 
+export interface ProjectImage {
+    url: string;
+    featured: boolean;
+}
+
 export interface Project {
     id: string;
     title: string;
@@ -14,7 +19,7 @@ export interface Project {
     year: number;
     location: string;
     image: string;
-    gallery: string[];
+    gallery: ProjectImage[]; // Modified to store objects
     category_id: string;
     categories?: Category;
     featured: boolean;
@@ -51,7 +56,35 @@ export function useProjects() {
             console.log("Projects response:", { projData, projError });
 
             if (projError) throw projError;
-            setProjects(projData || []);
+
+            // Normalize data: specific handling for gallery which might be string[] or object[] in DB
+            const normalizedProjects = (projData || []).map((p: any) => ({
+                ...p,
+                gallery: Array.isArray(p.gallery)
+                    ? p.gallery.map((item: any) => {
+                        if (typeof item === 'string') {
+                            // Check if it's a JSON string of an object (e.g. from previous incorrect saves)
+                            if (item.trim().startsWith('{')) {
+                                try {
+                                    const parsed = JSON.parse(item);
+                                    return parsed;
+                                } catch (e) {
+                                    // Not valid JSON, keep as string URL
+                                    return { url: item, featured: false };
+                                }
+                            }
+                            // Regular URL string
+                            return { url: item, featured: false };
+                        }
+                        // Already an object
+                        return item;
+                    })
+                    : []
+            }));
+
+            console.log("Normalized Projects:", normalizedProjects);
+
+            setProjects(normalizedProjects);
 
         } catch (err: any) {
             console.error('Error fetching data:', err);
