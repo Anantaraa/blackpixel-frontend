@@ -2,6 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
+import ThemeToggle from './ThemeToggle';
+
 const Navigation: React.FC = () => {
 
     const links = [
@@ -12,11 +14,15 @@ const Navigation: React.FC = () => {
 
     return (
         <>
-            {/* Top Logo */}
             <div className="fixed top-8 left-8 z-50 mix-blend-difference text-white">
                 <Link to="/" className="text-xl font-display font-bold tracking-tighter">
                     BP.
                 </Link>
+            </div>
+
+            {/* Theme Toggle */}
+            <div className="fixed top-8 right-8 z-50 mix-blend-difference">
+                <ThemeToggle />
             </div>
 
             {/* Bottom Floating Dock */}
@@ -24,20 +30,20 @@ const Navigation: React.FC = () => {
                 <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    className="flex items-center gap-1 p-2 bg-neutral-card/80 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl"
+                    className="flex items-center gap-1 p-2 bg-neutral-card/80 backdrop-blur-xl border border-neutral-border rounded-full shadow-2xl"
                 >
                     {links.map((link) => (
                         <Link
                             key={link.name}
                             to={link.path}
-                            className="px-6 py-3 rounded-full text-sm font-medium text-text-muted hover:text-white hover:bg-white/10 transition-all duration-300"
+                            className="px-6 py-3 rounded-full text-sm font-medium text-text-muted hover:text-text hover:bg-neutral transition-all duration-300"
                         >
                             {link.name}
                         </Link>
                     ))}
                     <Link
                         to="/contact"
-                        className="ml-2 px-6 py-3 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-transform"
+                        className="ml-2 px-6 py-3 rounded-full bg-text text-neutral text-sm font-bold hover:scale-105 transition-transform"
                     >
                         Let's Talk
                     </Link>

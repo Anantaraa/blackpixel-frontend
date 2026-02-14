@@ -41,7 +41,7 @@ const HeroSection: React.FC = () => {
                         initial={{ y: 100, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                        className="text-[12vw] leading-none font-display font-medium tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20"
+                        className="text-[12vw] leading-none font-display font-medium tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-text to-text/20 pb-4"
                     >
                         Blackpixel
                     </motion.h1>
@@ -65,7 +65,7 @@ const HeroSection: React.FC = () => {
                 className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
             >
                 <span className="text-xs uppercase tracking-widest text-text-muted">Scroll</span>
-                <div className="w-[1px] h-12 bg-gradient-to-b from-white to-transparent" />
+                <div className="w-[1px] h-12 bg-gradient-to-b from-text to-transparent" />
             </motion.div>
         </section>
     );

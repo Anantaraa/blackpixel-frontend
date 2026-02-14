@@ -64,11 +64,11 @@ const FeaturedProjects: React.FC = () => {
     }, [projects]);
 
     if (loading && projects.length === 0) {
-        return <div className="py-20 text-center text-white">Loading Projects...</div>;
+        return <div className="py-20 text-center text-text">Loading Projects...</div>;
     }
 
     return (
-        <section className="bg-neutral text-white" id="projects">
+        <section className="bg-neutral text-text" id="projects">
             <div className="py-20 mb-8 text-center bg-neutral">
                 <h2 className="text-4xl md:text-6xl font-display font-medium uppercase tracking-tight">
                     Selected Works

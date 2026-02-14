@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class',
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,19 +8,19 @@ export default {
     theme: {
         extend: {
             colors: {
-                primary: '#2EB4FF', // Electric Blue (Tech/Modern)
-                primaryDark: '#0090E0',
-                secondary: '#FFFFFF', // White text for Dark Mode
+                primary: 'rgba(var(--color-primary) / <alpha-value>)',
+                primaryDark: 'rgba(var(--color-primary-dark) / <alpha-value>)',
+                secondary: 'rgba(var(--color-secondary) / <alpha-value>)',
                 neutral: {
-                    DEFAULT: '#09090B', // Zinc 950 (Deep Dark)
-                    card: '#18181B',    // Zinc 900
-                    border: '#27272A',  // Zinc 800
+                    DEFAULT: 'rgba(var(--color-neutral) / <alpha-value>)',
+                    card: 'rgba(var(--color-neutral-card) / <alpha-value>)',
+                    border: 'rgba(var(--color-neutral-border) / <alpha-value>)',
                 },
                 text: {
-                    DEFAULT: '#F4F4F5', // Zinc 100
-                    muted: '#A1A1AA',   // Zinc 400
+                    DEFAULT: 'rgba(var(--color-text) / <alpha-value>)',
+                    muted: 'rgba(var(--color-text-muted) / <alpha-value>)',
                 },
-                surface: '#000000', // Pure Black
+                surface: 'rgba(var(--color-surface) / <alpha-value>)',
             },
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],

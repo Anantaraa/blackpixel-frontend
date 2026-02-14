@@ -6,7 +6,7 @@ const Footer: React.FC = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="bg-neutral text-white pt-32 pb-8">
+        <footer className="bg-neutral text-text pt-32 pb-8">
             <div className="container mx-auto px-6 md:px-12">
 
                 {/* Large CTA Section */}
@@ -19,14 +19,14 @@ const Footer: React.FC = () => {
                     </div>
                     <Link
                         to="/contact"
-                        className="group flex items-center justify-center w-32 h-32 md:w-48 md:h-48 rounded-full border border-white/20 hover:bg-white hover:text-black hover:border-white transition-all duration-500"
+                        className="group flex items-center justify-center w-32 h-32 md:w-48 md:h-48 rounded-full border border-neutral-border hover:bg-text hover:text-neutral hover:border-text transition-all duration-500"
                     >
                         <span className="text-lg font-medium">Let's Talk</span>
                     </Link>
                 </div>
 
                 {/* Links Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20 border-t border-white/10 pt-16">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20 border-t border-neutral-border pt-16">
                     {/* Brand Column */}
                     <div className="space-y-6">
                         <Link to="/" className="text-2xl font-display font-bold tracking-tighter">BP.</Link>
@@ -90,11 +90,11 @@ const Footer: React.FC = () => {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 text-sm text-text-muted">
+                <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-neutral-border text-sm text-text-muted">
                     <p>© {currentYear} BlackPixel Studio.</p>
                     <div className="flex gap-8 mt-4 md:mt-0">
-                        <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-                        <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                        <Link to="/privacy" className="hover:text-text transition-colors">Privacy Policy</Link>
+                        <Link to="/terms" className="hover:text-text transition-colors">Terms of Service</Link>
                     </div>
                 </div>
             </div>
