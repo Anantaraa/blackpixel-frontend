@@ -7,7 +7,7 @@ const ThemeToggle: React.FC = () => {
 
     return (
         <button
-            onClick={toggleTheme}
+            onClick={(e) => toggleTheme(e.clientX, e.clientY)}
             className="p-2 rounded-full bg-neutral-card/50 backdrop-blur-md border border-neutral-border hover:bg-neutral-border transition-colors duration-300 group"
             aria-label="Toggle Theme"
         >

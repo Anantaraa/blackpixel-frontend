@@ -12,6 +12,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* View Transition Styles */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* 
+   When switching Dark -> Light (DOM is Light)
+   We want the Old View (Dark) to stay on TOP and shrink.
+   By default, New View is on top. We reverse this using the data attribute.
+*/
+[data-theme-transition="to-light"]::view-transition-old(root) {
+  z-index: 2147483647;
+}
+
+[data-theme-transition="to-light"]::view-transition-new(root) {
+  z-index: 0;
+}
+
 @layer base {
   :root {
     /* Light Mode (Default) */
@@ -43,7 +63,11 @@
     --color-primary: 46 180 255;
     /* #2EB4FF */
     --color-primary-dark: 0 144 224;
+
     /* #0090E0 */
+    /*
+
+
     --color-secondary: 255 255 255;
     /* White text for Dark Mode */
 
