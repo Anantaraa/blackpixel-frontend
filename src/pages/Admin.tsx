@@ -20,7 +20,7 @@ const Admin = () => {
         year: new Date().getFullYear(),
         image: '',
         description: '',
-        featured: false,
+        featured: true, // Default to true
         display_order: 0,
         gallery: [] as ProjectImage[]
     };
@@ -432,15 +432,7 @@ const Admin = () => {
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        id="featured"
-                                        checked={formData.featured}
-                                        onChange={e => setFormData({ ...formData, featured: e.target.checked })}
-                                    />
-                                    <label htmlFor="featured">Featured Project</label>
-                                </div>
+                                {/* Featured Checkbox Removed - Default True */}
 
                                 <div className="flex justify-end gap-3 mt-6">
                                     <button

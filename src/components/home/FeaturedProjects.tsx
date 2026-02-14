@@ -57,7 +57,9 @@ const FeaturedProjects: React.FC = () => {
         const items: DisplayItem[] = [];
         projects.forEach(p => {
             // Main Image
-            if (p.featured && p.image) {
+            // User requested all projects effectively featured. 
+            // So we show Main Image for ALL projects (if it exists).
+            if (p.image) {
                 items.push({
                     id: `${p.id}-main`,
                     project: p,
