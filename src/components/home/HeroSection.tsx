@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Lenis from 'lenis';
+import HeroSlider from './HeroSlider';
 
 const HeroSection: React.FC = () => {
     const { scrollY } = useScroll();
@@ -25,11 +26,7 @@ const HeroSection: React.FC = () => {
             {/* Background Media */}
             <div className="absolute inset-0 z-0">
                 <motion.div style={{ scale: scaleImg }} className="w-full h-full">
-                    <img
-                        src="/hero-bg.png"
-                        alt="Architectural visualization"
-                        className="w-full h-full object-cover"
-                    />
+                    <HeroSlider />
                     <motion.div style={{ opacity: opacityOverlay }} className="absolute inset-0 bg-neutral" />
                 </motion.div>
             </div>

@@ -1,9 +1,10 @@
-                                                                                                                                                                                                                    import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjects } from '../hooks/useProjects';
 import type { Project } from '../hooks/useProjects';
 import { uploadToCloudinary } from '../utils/cloudinary';
 import { supabase } from '../utils/supabase';
+import { HeroSlidesManager } from '../components/admin/HeroSlidesManager';
 
 const Admin = () => {
     const { projects, categories, loading, error, addProject, updateProject, deleteProject } = useProjects();
@@ -88,6 +89,8 @@ const Admin = () => {
         setFormData(initialForm);
     };
 
+    const [activeTab, setActiveTab] = useState<'projects' | 'hero'>('projects');
+
     if (loading) return <div className="p-10 text-center">Loading Admin...</div>;
     if (error) return <div className="p-10 text-center text-red-500">Error: {error}</div>;
 
@@ -95,7 +98,7 @@ const Admin = () => {
         <div className="min-h-screen bg-white text-black p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold">Project CMS</h1>
+                    <h1 className="text-3xl font-bold">Content Management</h1>
                     <div className="flex gap-4">
                         <button
                             onClick={handleSignOut}
@@ -103,58 +106,90 @@ const Admin = () => {
                         >
                             Sign Out
                         </button>
-                        <button
-                            onClick={() => setIsFormOpen(true)}
-                            className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800 transition"
-                        >
-                            + Add New Project
-                        </button>
                     </div>
                 </div>
 
-
-                {/* Project List */}
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                        <thead>
-                            <tr className="bg-gray-100 text-left">
-                                <th className="p-4 border-b">Image</th>
-                                <th className="p-4 border-b">Title</th>
-                                <th className="p-4 border-b">Order</th>
-                                <th className="p-4 border-b">Category</th>
-                                <th className="p-4 border-b">Location</th>
-                                <th className="p-4 border-b">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {projects.map((project) => (
-                                <tr key={project.id} className="border-b hover:bg-gray-50">
-                                    <td className="p-4">
-                                        <img src={project.image} alt={project.title} className="w-16 h-16 object-cover rounded" />
-                                    </td>
-                                    <td className="p-4 font-medium">{project.title} {project.featured && '⭐'}</td>
-                                    <td className="p-4 font-mono">{project.display_order}</td>
-                                    <td className="p-4">{project.categories?.name || 'Uncategorized'}</td>
-                                    <td className="p-4">{project.location}</td>
-                                    <td className="p-4 space-x-2">
-                                        <button
-                                            onClick={() => handleEdit(project)}
-                                            className="text-blue-600 hover:underline"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(project.id)}
-                                            className="text-red-600 hover:underline"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                {/* Tabs */}
+                <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit mb-8">
+                    <button
+                        onClick={() => setActiveTab('projects')}
+                        className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'projects'
+                                ? 'bg-white text-black shadow-sm'
+                                : 'text-gray-500 hover:text-black'
+                            }`}
+                    >
+                        Projects
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('hero')}
+                        className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'hero'
+                                ? 'bg-white text-black shadow-sm'
+                                : 'text-gray-500 hover:text-black'
+                            }`}
+                    >
+                        Hero Slides
+                    </button>
                 </div>
+
+                {/* Content */}
+                {activeTab === 'hero' ? (
+                    <HeroSlidesManager />
+                ) : (
+                    <>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold">Projects List</h2>
+                            <button
+                                onClick={() => setIsFormOpen(true)}
+                                className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800 transition"
+                            >
+                                + Add New Project
+                            </button>
+                        </div>
+
+                        {/* Project List */}
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse">
+                                <thead>
+                                    <tr className="bg-gray-100 text-left">
+                                        <th className="p-4 border-b">Image</th>
+                                        <th className="p-4 border-b">Title</th>
+                                        <th className="p-4 border-b">Order</th>
+                                        <th className="p-4 border-b">Category</th>
+                                        <th className="p-4 border-b">Location</th>
+                                        <th className="p-4 border-b">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {projects.map((project) => (
+                                        <tr key={project.id} className="border-b hover:bg-gray-50">
+                                            <td className="p-4">
+                                                <img src={project.image} alt={project.title} className="w-16 h-16 object-cover rounded" />
+                                            </td>
+                                            <td className="p-4 font-medium">{project.title} {project.featured && '⭐'}</td>
+                                            <td className="p-4 font-mono">{project.display_order}</td>
+                                            <td className="p-4">{project.categories?.name || 'Uncategorized'}</td>
+                                            <td className="p-4">{project.location}</td>
+                                            <td className="p-4 space-x-2">
+                                                <button
+                                                    onClick={() => handleEdit(project)}
+                                                    className="text-blue-600 hover:underline"
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(project.id)}
+                                                    className="text-red-600 hover:underline"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                )}
 
                 {/* Modal Form */}
                 {isFormOpen && (
