@@ -7,7 +7,7 @@ const HeroSection: React.FC = () => {
     const yText = useTransform(scrollY, [0, 500], [0, -100]);
     const opacityText = useTransform(scrollY, [0, 300], [1, 0]);
     const scaleImg = useTransform(scrollY, [0, 1000], [1, 1.2]);
-    const opacityOverlay = useTransform(scrollY, [0, 500], [0.3, 0.8]);
+    const opacityOverlay = useTransform(scrollY, [0, 500], [0, 0.8]);
 
     useEffect(() => {
         const lenis = new Lenis();
