@@ -8,7 +8,7 @@ const About: React.FC = () => {
         <div className="min-h-screen bg-neutral flex flex-col">
             <Navigation />
 
-            <main className="flex-grow pt-32 pb-24">
+            <main className="flex-grow pt-32 pb-0">
                 <div className="container mx-auto px-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -45,7 +45,7 @@ const About: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="mb-32">
+                    <div className="mb-0">
                         <h2 className="text-3xl md:text-5xl font-display font-medium mb-16 text-center text-text">The Team</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {[
