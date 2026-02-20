@@ -243,7 +243,7 @@ const Admin = () => {
                                             <td className="p-4 space-x-2">
                                                 <button
                                                     onClick={() => handleEdit(project)}
-                                                    className="text-blue-600 hover:underline"
+                                                    className="text-primary hover:underline"
                                                 >
                                                     Edit
                                                 </button>
