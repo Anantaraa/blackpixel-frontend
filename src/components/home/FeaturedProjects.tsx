@@ -144,6 +144,8 @@ const FeaturedProjects: React.FC = () => {
 
             <ProjectLightbox
                 project={selectedProject as any} // Temporary cast until Lightbox is updated
+                nextProject={selectedProject ? projects[(projects.findIndex(p => p.id === selectedProject.id) + 1) % projects.length] : null}
+                prevProject={selectedProject ? projects[(projects.findIndex(p => p.id === selectedProject.id) - 1 + projects.length) % projects.length] : null}
                 isOpen={isLightboxOpen}
                 onClose={closeLightbox}
                 onNext={handleNext}
