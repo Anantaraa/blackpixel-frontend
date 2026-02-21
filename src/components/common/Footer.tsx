@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
                     </div>
                     <Link
                         to="/contact"
-                        className="group flex items-center justify-center w-32 h-32 md:w-48 md:h-48 rounded-full border border-neutral-border hover:bg-text hover:text-neutral hover:border-text transition-all duration-500"
+                        className="group flex items-center justify-center w-32 h-32 md:w-48 md:h-48 rounded-full border border-neutral-border bg-text text-surface hover:bg-transparent hover:text-text hover:border-text transition-all duration-500"
                     >
                         <span className="text-lg font-medium">Let's Talk</span>
                     </Link>

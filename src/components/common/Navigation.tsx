@@ -43,7 +43,7 @@ const Navigation: React.FC = () => {
                     ))}
                     <Link
                         to="/contact"
-                        className="ml-2 px-6 py-3 rounded-full bg-text text-neutral text-sm font-bold hover:scale-105 transition-transform"
+                        className="ml-2 px-6 py-3 rounded-full bg-text text-surface text-sm font-bold hover:scale-105 transition-transform"
                     >
                         Let's Talk
                     </Link>
