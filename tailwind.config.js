@@ -37,7 +37,7 @@ export default {
             },
             backgroundImage: {
                 'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-                'hero-glow': 'conic-gradient(from 180deg at 50% 50%, #2EB4FF33 0deg, #000000 360deg)',
+                'hero-glow': 'conic-gradient(from 180deg at 50% 50%, #71717A33 0deg, #000000 360deg)',
             }
         },
     },

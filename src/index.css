@@ -35,10 +35,10 @@
 @layer base {
   :root {
     /* Light Mode (Default) */
-    --color-primary: 46 180 255;
-    /* #2EB4FF */
-    --color-primary-dark: 0 144 224;
-    /* #0090E0 */
+    --color-primary: 113 113 122;
+    /* #71717a */
+    --color-primary-dark: 113 113 122;
+    /* #71717a */
     --color-secondary: 0 0 0;
     /* Black text for Light Mode */
 
@@ -60,11 +60,11 @@
 
   .dark {
     /* Dark Mode */
-    --color-primary: 46 180 255;
-    /* #2EB4FF */
-    --color-primary-dark: 0 144 224;
+    --color-primary: 113 113 122;
+    /* #71717a */
+    --color-primary-dark: 113 113 122;
 
-    /* #0090E0 */
+    /* #71717a */
     /*
 
 
