@@ -72,7 +72,7 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-surface/95 backdrop-blur-sm p-4 md:p-8"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-surface/75 p-4 md:p-8"
                     onClick={onClose} // Close when clicking backdrop
                 >
                     {/* Master Close Button */}
@@ -115,24 +115,22 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                         )}
                     </div>
 
-                    {/* Invisible Fullscreen Click Areas (Image Level) */}
-                    {allImages.length > 1 && (
-                        <>
-                            <div
-                                className="fixed left-0 top-0 bottom-0 w-1/2 z-[90] cursor-w-resize"
-                                onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
-                                title="Previous Image"
-                            />
-                            <div
-                                className="fixed right-0 top-0 bottom-0 w-1/2 z-[90] cursor-e-resize"
-                                onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
-                                title="Next Image"
-                            />
-                        </>
-                    )}
-
                     {/* Fullscreen Image Container */}
-                    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-surface">
+                    <div className="fixed inset-0 z-[80] flex items-center justify-center pointer-events-none">
+                        {allImages.length > 1 && (
+                            <>
+                                <div
+                                    className="fixed left-0 top-0 bottom-0 w-1/2 z-[90] cursor-w-resize pointer-events-auto"
+                                    onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                                    title="Previous Image"
+                                />
+                                <div
+                                    className="fixed right-0 top-0 bottom-0 w-1/2 z-[90] cursor-e-resize pointer-events-auto"
+                                    onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                                    title="Next Image"
+                                />
+                            </>
+                        )}
                         {allImages.length > 0 && (
                             <motion.img
                                 key={`${project.id}-img-${currentImageIndex}`}
@@ -141,83 +139,92 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                                 transition={{ duration: 0.4 }}
                                 src={allImages[currentImageIndex]}
                                 alt={`${project.title} - Image ${currentImageIndex + 1}`}
-                                className="max-w-full max-h-[100vh] object-contain pointer-events-none"
+                                className="max-w-full max-h-[100vh] object-contain pointer-events-auto"
                             />
                         )}
                     </div>
 
                     {/* Floating Details Pane */}
-                    <AnimatePresence mode="wait">
-                        {isDetailsVisible ? (
+                    <AnimatePresence>
+                        {isDetailsVisible && (
                             <motion.div
-                                key="details-open"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                className="fixed bottom-8 right-4 md:right-24 md:bottom-auto md:top-24 z-[120] w-[calc(100vw-2rem)] md:w-[400px] h-[75vh] max-h-[800px] bg-surface/60 backdrop-blur-xl border border-text/10 p-6 md:p-8 rounded-[2.5rem] rounded-tr-xl flex flex-col shadow-2xl pointer-events-auto"
+                                key="details-pane"
+                                initial={{ opacity: 0, clipPath: 'circle(0px at calc(100% - 3.5rem) calc(100% - 3.5rem))' }}
+                                animate={{ opacity: 1, clipPath: 'circle(150% at calc(100% - 3.5rem) calc(100% - 3.5rem))' }}
+                                exit={{ opacity: 0, clipPath: 'circle(0px at calc(100% - 3.5rem) calc(100% - 3.5rem))' }}
+                                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                className="fixed bottom-0 left-0 right-0 z-[120] pb-0 pt-10 px-4 md:px-12 bg-surface/20 backdrop-blur-2xl text-text  flex flex-col shadow-[0_-20px_40px_-20px_rgba(0,0,0,0.1)] pointer-events-auto h-[40vh] md:h-[35vh] border-t border-text/10"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                {/* Minimize Button inside pane */}
-                                <button
-                                    onClick={() => setIsDetailsVisible(false)}
-                                    className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center text-text/50 hover:text-text transition-colors bg-surface/50 hover:bg-surface/80 rounded-full backdrop-blur-md border border-text/10 z-[130]"
-                                    title="Minimize Details"
-                                >
-                                    <X size={24} />
-                                </button>
-
-                                <div className="overflow-y-auto pr-2 custom-scrollbar mt-4 h-full">
-                                    <div className="mb-6">
-                                        <span className="inline-block px-3 py-1 mb-4 text-xs bg-text/10 rounded-full text-text/80 uppercase tracking-widest">
+                                <div className="flex flex-col md:flex-row gap-6 p-6 md:p-8 overflow-y-auto custom-scrollbar relative h-full">
+                                    {/* Left Side: Category, Title, Location */}
+                                    <div className="w-full md:w-1/3 shrink-0 flex flex-col pt-4">
+                                        <span className="w-fit inline-block px-4 py-2 mb-3 text-sm bg-text/5 rounded-full text-text/60 uppercase tracking-widest font-semibold border border-text/10">
                                             {project.categories?.name || 'Project'}
                                         </span>
-                                        <h2 className="text-3xl font-display font-bold text-text mb-2 leading-tight pr-6">
+                                        <h2 className="text-5xl md:text-6xl font-display font-medium text-text mb-3 leading-tight tracking-tight">
                                             {project.title}
                                         </h2>
-                                        <p className="text-text/50 text-sm font-mono tracking-wide">
+                                        <p className="text-text/40 text-base font-mono tracking-wider mb-6 uppercase">
                                             {project.location} • {project.year}
                                         </p>
                                     </div>
 
+                                    {/* Center: Description */}
                                     {project.description && (
-                                        <div className="mb-6">
-                                            <p className="text-text/80 leading-relaxed font-light text-sm">
-                                                {project.description}
-                                            </p>
+                                        <div className="w-full md:w-1/2 max-w-2xl text-[1.18rem] text-text/70 leading-relaxed font-light mt-4 md:mt-0 pr-0 md:pr-4 pt-4">
+                                            <p>{project.description}</p>
                                         </div>
                                     )}
+
+                                    {/* Right Side: Pagination */}
+                                    <div className="hidden md:flex flex-col items-end justify-start ml-auto h-full pt-4">
+                                        {allImages.length > 1 && (
+                                            <div className="inline-flex items-center gap-2 px-6 py-3 bg-text/5 rounded-full border border-text/10 mb-4 backdrop-blur-md">
+                                                <span className="text-text/60 font-mono text-base tracking-widest">
+                                                    {currentImageIndex + 1} / {allImages.length}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {/* Spacer to prevent overlap with the global fixed button */}
+                                        <div className="w-12 h-12 mt-auto shrink-0" />
+                                    </div>
+
+                                    {/* Mobile bottom row: Pagination & Spacer */}
+                                    <div className="flex md:hidden items-center justify-between w-full mt-6 pb-6">
+                                        {allImages.length > 1 && (
+                                            <div className="inline-flex items-center gap-2 px-6 py-3 bg-text/5 rounded-full border border-text/10">
+                                                <span className="text-text/60 font-mono text-base tracking-widest">
+                                                    {currentImageIndex + 1} / {allImages.length}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {/* Spacer to prevent overlap with the global fixed button */}
+                                        <div className="w-12 h-12 ml-auto shrink-0" />
+                                    </div>
                                 </div>
                             </motion.div>
-                        ) : (
-                            <motion.button
-                                key="details-closed"
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                onClick={(e) => { e.stopPropagation(); setIsDetailsVisible(true); }}
-                                className="fixed right-10 bottom-[calc(75vh-2.5rem)] md:bottom-auto md:top-[7.5rem] md:right-[7.5rem] z-[130] w-12 h-12 flex items-center justify-center bg-surface/80 hover:bg-surface backdrop-blur-xl border border-text/10 rounded-full text-text transition-all shadow-lg hover:shadow-text/5 pointer-events-auto"
-                                title="Show Details"
-                            >
-                                <Info size={24} />
-                            </motion.button>
                         )}
                     </AnimatePresence>
 
-                    {/* Dot Navigation */}
-                    {allImages.length > 1 && (
-                        <div className="fixed bottom-8 left-0 right-0 z-[120] flex justify-center pointer-events-none">
-                            <div className="bg-surface/40 backdrop-blur-md px-4 py-3 rounded-full flex gap-3 pointer-events-auto border border-text/5 shadow-xl">
-                                {allImages.map((_, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(idx); }}
-                                        className={`h-2 rounded-full transition-all duration-300 ${currentImageIndex === idx ? 'bg-text w-6' : 'bg-text/40 hover:bg-text/80 w-2'}`}
-                                        aria-label={`Go to image ${idx + 1}`}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    {/* Permanent Toggle Button (X / Info) */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); setIsDetailsVisible(!isDetailsVisible); }}
+                        className="fixed bottom-8 right-8 md:bottom-12 md:right-12 z-[130] w-12 h-12 flex items-center justify-center bg-surface hover:bg-surface/90 backdrop-blur-xl border border-text/10 rounded-full text-text transition-all shadow-xl hover:shadow-text/5 pointer-events-auto overflow-hidden group"
+                        title={isDetailsVisible ? "Minimize Details" : "Show Details"}
+                    >
+                        <AnimatePresence mode="wait">
+                            {isDetailsVisible ? (
+                                <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                                    <X size={20} className="group-hover:scale-110 transition-transform" />
+                                </motion.div>
+                            ) : (
+                                <motion.div key="info" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                                    <Info size={20} className="group-hover:scale-110 transition-transform" />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </button>
                 </motion.div>
             )}
         </AnimatePresence>
