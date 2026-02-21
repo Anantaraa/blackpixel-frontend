@@ -101,7 +101,7 @@ export const HeroSlidesManager: React.FC = () => {
                                 hover:file:bg-violet-100"
                             disabled={isUploading}
                         />
-                        {isUploading && <span className="text-sm text-primary">Uploading...</span>}
+                        {isUploading && <span className="text-sm text-blue-600">Uploading...</span>}
 
                         <input
                             type="url"

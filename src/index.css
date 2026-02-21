@@ -35,10 +35,10 @@
 @layer base {
   :root {
     /* Light Mode (Default) */
-    --color-primary: 113 113 122;
-    /* #71717A (Zinc 500) */
-    --color-primary-dark: 82 82 91;
-    /* #52525B (Zinc 600) */
+    --color-primary: 46 180 255;
+    /* #2EB4FF */
+    --color-primary-dark: 0 144 224;
+    /* #0090E0 */
     --color-secondary: 0 0 0;
     /* Black text for Light Mode */
 
@@ -60,10 +60,14 @@
 
   .dark {
     /* Dark Mode */
-    --color-primary: 113 113 122;
-    /* #71717A (Zinc 500) */
-    --color-primary-dark: 161 161 170;
-    /* #A1A1AA (Zinc 400 - Lighter for dark mode hover) */
+    --color-primary: 46 180 255;
+    /* #2EB4FF */
+    --color-primary-dark: 0 144 224;
+
+    /* #0090E0 */
+    /*
+
+
     --color-secondary: 255 255 255;
     /* White text for Dark Mode */
 

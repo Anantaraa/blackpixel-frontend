@@ -15,10 +15,12 @@ interface ProjectLightboxProps {
 }
 
 const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject, prevProject, isOpen, onClose, onNext, onPrev }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isDetailsVisible, setIsDetailsVisible] = useState(true);
 
-    // Reset details visibility when project changes
+    // Reset image index and details visibility when project changes
     useEffect(() => {
+        setCurrentImageIndex(0);
         setIsDetailsVisible(true);
     }, [project]);
 
@@ -26,6 +28,15 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
     const allImages = project
         ? Array.from(new Set([project.image, ...(project.gallery?.map(g => g.url) || [])].filter(Boolean)))
         : [];
+
+    // Handlers for image sliding
+    const handleNextImage = () => {
+        setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+    };
+
+    const handlePrevImage = () => {
+        setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+    };
 
     // Lock body scroll when lightbox is open
     useEffect(() => {
@@ -104,25 +115,35 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                         )}
                     </div>
 
-                    {/* Fullscreen Image Scroll Container */}
-                    <div
-                        className="fixed inset-0 z-[80] overflow-y-auto overflow-x-hidden custom-scrollbar bg-surface w-full h-full"
-                        data-lenis-prevent="true"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="w-full min-h-full flex flex-col items-center">
-                            {allImages.map((imgUrl, idx) => (
-                                <motion.img
-                                    key={`${project.id}-img-${idx}`}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.4, delay: Math.min(idx * 0.1, 0.5) }}
-                                    src={imgUrl}
-                                    alt={`${project.title} - Image ${idx + 1}`}
-                                    className="w-full h-auto object-cover mb-1 md:mb-2 pointer-events-none"
-                                />
-                            ))}
-                        </div>
+                    {/* Invisible Fullscreen Click Areas (Image Level) */}
+                    {allImages.length > 1 && (
+                        <>
+                            <div
+                                className="fixed left-0 top-0 bottom-0 w-1/2 z-[90] cursor-w-resize"
+                                onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                                title="Previous Image"
+                            />
+                            <div
+                                className="fixed right-0 top-0 bottom-0 w-1/2 z-[90] cursor-e-resize"
+                                onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                                title="Next Image"
+                            />
+                        </>
+                    )}
+
+                    {/* Fullscreen Image Container */}
+                    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-surface">
+                        {allImages.length > 0 && (
+                            <motion.img
+                                key={`${project.id}-img-${currentImageIndex}`}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.4 }}
+                                src={allImages[currentImageIndex]}
+                                alt={`${project.title} - Image ${currentImageIndex + 1}`}
+                                className="max-w-full max-h-[100vh] object-contain pointer-events-none"
+                            />
+                        )}
                     </div>
 
                     {/* Floating Details Pane */}
@@ -182,7 +203,21 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                         )}
                     </AnimatePresence>
 
-
+                    {/* Dot Navigation */}
+                    {allImages.length > 1 && (
+                        <div className="fixed bottom-8 left-0 right-0 z-[120] flex justify-center pointer-events-none">
+                            <div className="bg-surface/40 backdrop-blur-md px-4 py-3 rounded-full flex gap-3 pointer-events-auto border border-text/5 shadow-xl">
+                                {allImages.map((_, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(idx); }}
+                                        className={`h-2 rounded-full transition-all duration-300 ${currentImageIndex === idx ? 'bg-text w-6' : 'bg-text/40 hover:bg-text/80 w-2'}`}
+                                        aria-label={`Go to image ${idx + 1}`}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </motion.div>
             )}
         </AnimatePresence>
