@@ -16,12 +16,12 @@ interface ProjectLightboxProps {
 
 const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject, prevProject, isOpen, onClose, onNext, onPrev }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [isDetailsVisible, setIsDetailsVisible] = useState(true);
+    const [isDetailsVisible, setIsDetailsVisible] = useState(false);
 
     // Reset image index and details visibility when project changes
     useEffect(() => {
         setCurrentImageIndex(0);
-        setIsDetailsVisible(true);
+        setIsDetailsVisible(false);
     }, [project]);
 
     // Deduplicate images
@@ -144,87 +144,108 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                         )}
                     </div>
 
-                    {/* Floating Details Pane */}
-                    <AnimatePresence>
+                    {/* Floating Details Pane Container */}
+                    <div className="fixed bottom-0 left-0 right-0 z-[120] pointer-events-none flex flex-col justify-end">
+
+                        {/* The Expanded Background (Open State) */}
                         {isDetailsVisible && (
                             <motion.div
-                                key="details-pane"
-                                initial={{ opacity: 0, clipPath: 'circle(0px at calc(100% - 3.5rem) calc(100% - 3.5rem))' }}
-                                animate={{ opacity: 1, clipPath: 'circle(150% at calc(100% - 3.5rem) calc(100% - 3.5rem))' }}
-                                exit={{ opacity: 0, clipPath: 'circle(0px at calc(100% - 3.5rem) calc(100% - 3.5rem))' }}
-                                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                                className="fixed bottom-0 left-0 right-0 z-[120] pb-0 pt-10 px-4 md:px-12 bg-surface/20 backdrop-blur-2xl text-text  flex flex-col shadow-[0_-20px_40px_-20px_rgba(0,0,0,0.1)] pointer-events-auto h-[40vh] md:h-[35vh] border-t border-text/10"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <div className="flex flex-col md:flex-row gap-6 p-6 md:p-8 overflow-y-auto custom-scrollbar relative h-full">
-                                    {/* Left Side: Category, Title, Location */}
-                                    <div className="w-full md:w-1/3 shrink-0 flex flex-col pt-4">
-                                        <span className="w-fit inline-block px-4 py-2 mb-3 text-sm bg-text/5 rounded-full text-text/60 uppercase tracking-widest font-semibold border border-text/10">
-                                            {project.categories?.name || 'Project'}
-                                        </span>
-                                        <h2 className="text-5xl md:text-6xl font-display font-medium text-text mb-3 leading-tight tracking-tight">
-                                            {project.title}
-                                        </h2>
-                                        <p className="text-text/40 text-base font-mono tracking-wider mb-6 uppercase">
-                                            {project.location} • {project.year}
-                                        </p>
-                                    </div>
-
-                                    {/* Center: Description */}
-                                    {project.description && (
-                                        <div className="w-full md:w-1/2 max-w-2xl text-[1.18rem] text-text/70 leading-relaxed font-light mt-4 md:mt-0 pr-0 md:pr-4 pt-4">
-                                            <p>{project.description}</p>
-                                        </div>
-                                    )}
-
-                                    {/* Right Side: Pagination */}
-                                    <div className="hidden md:flex flex-col items-end justify-start ml-auto h-full pt-4">
-                                        {allImages.length > 1 && (
-                                            <div className="inline-flex items-center gap-2 px-6 py-3 bg-text/5 rounded-full border border-text/10 mb-4 backdrop-blur-md">
-                                                <span className="text-text/60 font-mono text-base tracking-widest">
-                                                    {currentImageIndex + 1} / {allImages.length}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {/* Spacer to prevent overlap with the global fixed button */}
-                                        <div className="w-12 h-12 mt-auto shrink-0" />
-                                    </div>
-
-                                    {/* Mobile bottom row: Pagination & Spacer */}
-                                    <div className="flex md:hidden items-center justify-between w-full mt-6 pb-6">
-                                        {allImages.length > 1 && (
-                                            <div className="inline-flex items-center gap-2 px-6 py-3 bg-text/5 rounded-full border border-text/10">
-                                                <span className="text-text/60 font-mono text-base tracking-widest">
-                                                    {currentImageIndex + 1} / {allImages.length}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {/* Spacer to prevent overlap with the global fixed button */}
-                                        <div className="w-12 h-12 ml-auto shrink-0" />
-                                    </div>
-                                </div>
-                            </motion.div>
+                                layoutId="dynamic-pane-bg"
+                                className="absolute inset-x-0 bottom-0 top-0 bg-surface/90 border-t border-text/10 pointer-events-auto"
+                                transition={{ type: 'spring', bounce: 0.15, duration: 0.6 }}
+                            />
                         )}
-                    </AnimatePresence>
 
-                    {/* Permanent Toggle Button (X / Info) */}
-                    <button
-                        onClick={(e) => { e.stopPropagation(); setIsDetailsVisible(!isDetailsVisible); }}
-                        className="fixed bottom-8 right-8 md:bottom-12 md:right-12 z-[130] w-12 h-12 flex items-center justify-center bg-surface hover:bg-surface/90 backdrop-blur-xl border border-text/10 rounded-full text-text transition-all shadow-xl hover:shadow-text/5 pointer-events-auto overflow-hidden group"
-                        title={isDetailsVisible ? "Minimize Details" : "Show Details"}
-                    >
-                        <AnimatePresence mode="wait">
-                            {isDetailsVisible ? (
-                                <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                                    <X size={20} className="group-hover:scale-110 transition-transform" />
-                                </motion.div>
-                            ) : (
-                                <motion.div key="info" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                                    <Info size={20} className="group-hover:scale-110 transition-transform" />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </button>
+                        <div className="relative z-10 w-full px-4 md:px-12 py-6 md:py-8 lg:py-10">
+                            <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center">
+
+                                {/* Left Side: Category, Title, Location */}
+                                <div className="w-full md:w-1/3 shrink-0 flex flex-col pointer-events-none z-10 relative">
+
+                                    {/* Category - Always visible, placed just above the Title */}
+                                    <motion.span
+                                        layout
+                                        className="w-fit inline-block px-3 py-1 mb-2 text-[10px] md:text-xs bg-surface/50 backdrop-blur-md rounded-full text-text/80 uppercase tracking-widest font-semibold border border-text/10 shadow-sm"
+                                    >
+                                        {project.categories?.name || 'Project'}
+                                    </motion.span>
+
+                                    {/* The Pill / Button Wrapper */}
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); setIsDetailsVisible(!isDetailsVisible); }}
+                                        className="relative flex items-center gap-3 md:gap-4 pointer-events-auto group text-left px-4 py-2 md:py-3 -ml-4 w-fit max-w-full outline-none"
+                                    >
+                                        {/* The Pill Background (Closed State) */}
+                                        {!isDetailsVisible && (
+                                            <motion.div
+                                                layoutId="dynamic-pane-bg"
+                                                className="absolute inset-0 bg-surface/90 backdrop-blur-xl border border-text/10 shadow-lg pointer-events-none"
+                                                style={{ borderRadius: '9999px' }}
+                                                transition={{ type: 'spring', bounce: 0.15, duration: 0.6 }}
+                                            />
+                                        )}
+
+                                        {/* Icon Button Inside Pill */}
+                                        <motion.div layout className="relative z-10 w-8 h-8 md:w-10 md:h-10 shrink-0 flex items-center justify-center border border-text text-text rounded-full shadow-sm group-hover:scale-105 transition-all overflow-hidden bg-transparent">
+                                            <AnimatePresence mode="wait">
+                                                {isDetailsVisible ? (
+                                                    <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                                                        <X size={16} />
+                                                    </motion.div>
+                                                ) : (
+                                                    <motion.div key="info" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+                                                        <Info size={16} />
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </motion.div>
+
+                                        {/* Title */}
+                                        <motion.h2 layout className="relative z-10 text-2xl md:text-3xl font-display font-bold text-text leading-none tracking-tight drop-shadow-sm pr-4 truncate pt-1">
+                                            {project.title}
+                                        </motion.h2>
+                                    </button>
+
+                                    {/* Location */}
+                                    <motion.p layout className="text-text/70 text-xs md:text-sm font-mono tracking-wider mt-4 uppercase drop-shadow-sm">
+                                        {project.location} • {project.year}
+                                    </motion.p>
+                                </div>
+
+                                {/* Fading Side Content (Open State Only) */}
+                                <AnimatePresence>
+                                    {isDetailsVisible && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ duration: 0.4, delay: 0.1 }}
+                                            className="w-full md:w-2/3 flex flex-col md:flex-row flex-wrap gap-6 md:gap-12 items-start md:items-center pointer-events-auto"
+                                        >
+                                            {/* Description */}
+                                            {project.description && (
+                                                <div className="flex-1 text-sm md:text-base text-text/70 leading-relaxed font-light mt-2 md:mt-0 max-w-2xl">
+                                                    <p>{project.description}</p>
+                                                </div>
+                                            )}
+
+                                            {/* Pagination */}
+                                            {allImages.length > 1 && (
+                                                <div className="shrink-0 flex items-center justify-end w-full md:w-auto mt-4 md:mt-0">
+                                                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-text/5 rounded-full border border-text/10 backdrop-blur-sm">
+                                                        <span className="text-text/60 font-mono text-sm tracking-widest">
+                                                            {currentImageIndex + 1} / {allImages.length}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                            </div>
+                        </div>
+                    </div>
                 </motion.div>
             )}
         </AnimatePresence>
