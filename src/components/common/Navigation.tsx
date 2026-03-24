@@ -36,14 +36,14 @@ const Navigation: React.FC = () => {
                         <Link
                             key={link.name}
                             to={link.path}
-                            className="px-6 py-3 rounded-full text-sm font-medium text-text-muted hover:text-text hover:bg-neutral transition-all duration-300"
+                            className="px-3 py-2 md:px-6 md:py-3 rounded-full text-xs md:text-sm font-medium text-text-muted hover:text-text hover:bg-neutral transition-all duration-300"
                         >
                             {link.name}
                         </Link>
                     ))}
                     <Link
                         to="/contact"
-                        className="ml-2 px-6 py-3 rounded-full bg-text text-surface text-sm font-bold hover:scale-105 transition-transform"
+                        className="ml-1 md:ml-2 px-4 py-2 md:px-6 md:py-3 rounded-full bg-text text-surface text-xs md:text-sm font-bold whitespace-nowrap hover:scale-105 transition-transform"
                     >
                         Let's Talk
                     </Link>

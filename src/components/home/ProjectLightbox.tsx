@@ -90,7 +90,7 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                         onClick={(e) => { e.stopPropagation(); onPrev(); }}
                     >
                         <div className="p-3 text-text/50 hover:text-text transition-all group-hover:scale-110 group-hover:-translate-x-1">
-                            <ChevronLeft size={48} />
+                            <ChevronLeft className="w-7 h-7 md:w-12 md:h-12" />
                         </div>
                         {prevProject && (
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-full mt-2 left-0 w-48 pointer-events-none bg-surface/60 backdrop-blur-md p-3 rounded-lg border border-text/10">
@@ -105,7 +105,7 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                         onClick={(e) => { e.stopPropagation(); onNext(); }}
                     >
                         <div className="p-3 text-text/50 hover:text-text transition-all group-hover:scale-110 group-hover:translate-x-1">
-                            <ChevronRight size={48} />
+                            <ChevronRight className="w-7 h-7 md:w-12 md:h-12" />
                         </div>
                         {nextProject && (
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-full mt-2 right-0 w-48 text-right pointer-events-none bg-surface/60 backdrop-blur-md p-3 rounded-lg border border-text/10">
@@ -147,11 +147,11 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                     {/* Floating Details Pane Container */}
                     <div className="fixed bottom-0 left-0 right-0 z-[120] pointer-events-none flex flex-col justify-end">
 
-                        {/* The Expanded Background (Open State) */}
+                        {/* The Expanded Background (Open State - desktop only) */}
                         {isDetailsVisible && (
                             <motion.div
                                 layoutId="dynamic-pane-bg"
-                                className="absolute inset-x-0 bottom-0 top-0 bg-surface/90 border-t border-text/10 pointer-events-auto"
+                                className="hidden md:block absolute inset-x-0 bottom-0 top-0 bg-surface/90 border-t border-text/10 pointer-events-auto"
                                 transition={{ type: 'spring', bounce: 0.15, duration: 0.6 }}
                             />
                         )}
@@ -173,7 +173,7 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                                     {/* The Pill / Button Wrapper */}
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setIsDetailsVisible(!isDetailsVisible); }}
-                                        className="relative flex items-center gap-3 md:gap-4 pointer-events-auto group text-left px-4 py-2 md:py-3 -ml-4 w-fit max-w-full outline-none"
+                                        className="relative flex items-center gap-2 lg:gap-4 pointer-events-auto group text-left px-3 py-1.5 lg:px-4 lg:py-3 -ml-3 lg:-ml-4 w-fit max-w-[calc(100vw-2rem)] outline-none"
                                     >
                                         {/* The Pill Background (Closed State) */}
                                         {!isDetailsVisible && (
@@ -186,22 +186,22 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                                         )}
 
                                         {/* Icon Button Inside Pill */}
-                                        <motion.div layout className="relative z-10 w-8 h-8 md:w-10 md:h-10 shrink-0 flex items-center justify-center border border-text text-text rounded-full shadow-sm group-hover:scale-105 transition-all overflow-hidden bg-transparent">
+                                        <motion.div layout className="relative z-10 w-5 h-5 lg:w-10 lg:h-10 shrink-0 flex items-center justify-center border border-text text-text rounded-full shadow-sm group-hover:scale-105 transition-all overflow-hidden bg-transparent">
                                             <AnimatePresence mode="wait">
                                                 {isDetailsVisible ? (
                                                     <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                                                        <X size={16} />
+                                                        <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                                     </motion.div>
                                                 ) : (
                                                     <motion.div key="info" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                                                        <Info size={16} />
+                                                        <Info className="w-3.5 h-3.5 md:w-4 md:h-4" />
                                                     </motion.div>
                                                 )}
                                             </AnimatePresence>
                                         </motion.div>
 
                                         {/* Title */}
-                                        <motion.h2 layout className="relative z-10 text-2xl md:text-3xl font-display font-bold text-text leading-none tracking-tight drop-shadow-sm pr-4 truncate pt-1">
+                                        <motion.h2 layout className="relative z-10 text-[10px] lg:text-3xl font-display font-bold text-text leading-none tracking-tight drop-shadow-sm pr-3 lg:pr-4 pt-1 whitespace-nowrap">
                                             {project.title}
                                         </motion.h2>
                                     </button>
@@ -224,7 +224,7 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                                         >
                                             {/* Description */}
                                             {project.description && (
-                                                <div className="flex-1 text-sm md:text-base text-text/70 leading-relaxed font-light mt-2 md:mt-0 max-w-2xl">
+                                                <div className="hidden lg:block flex-1 text-sm md:text-base text-text/70 leading-relaxed font-light mt-2 md:mt-0 max-w-2xl">
                                                     <p>{project.description}</p>
                                                 </div>
                                             )}

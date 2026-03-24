@@ -120,7 +120,7 @@ const FeaturedProjects: React.FC = () => {
 
     return (
         <section className="bg-neutral text-text" id="projects">
-            <div className="py-20 mb-8 text-center bg-neutral">
+            <div className="py-10 md:py-20 mb-4 md:mb-8 text-center bg-neutral">
                 <h2 className="text-4xl md:text-6xl font-display font-medium uppercase tracking-tight">
                     Selected Works
                 </h2>

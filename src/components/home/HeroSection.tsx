@@ -32,7 +32,7 @@ const HeroSection: React.FC = () => {
             </div>
 
             {/* Content */}
-            <div className="relative z-10 w-full h-full flex flex-col justify-center items-center text-center px-4">
+            <div className="relative z-10 w-full h-full flex flex-col justify-center items-center text-center px-4 pb-28 md:pb-0">
                 <motion.div style={{ y: yText, opacity: opacityText }}>
                     <motion.h1
                         initial={{ y: 100, opacity: 0 }}
