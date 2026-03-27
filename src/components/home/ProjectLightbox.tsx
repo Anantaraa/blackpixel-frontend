@@ -201,7 +201,7 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                                         </motion.div>
 
                                         {/* Title */}
-                                        <motion.h2 layout className="relative z-10 text-[10px] lg:text-3xl font-display font-bold text-text leading-none tracking-tight drop-shadow-sm pr-3 lg:pr-4 pt-1 whitespace-nowrap">
+                                        <motion.h2 layout className="relative z-10 text-[10px] lg:text-[15px] font-display font-bold text-text leading-none tracking-tight drop-shadow-sm pr-3 lg:pr-4 pt-1 whitespace-nowrap">
                                             {project.title}
                                         </motion.h2>
                                     </button>

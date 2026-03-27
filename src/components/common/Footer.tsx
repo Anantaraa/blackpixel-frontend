@@ -79,11 +79,11 @@ const Footer: React.FC = () => {
                         <h3 className="text-sm font-mono text-text-muted mb-6 uppercase tracking-wider">Contact</h3>
                         <div className="space-y-4">
                             <a href="mailto:hello@blackpixel.com" className="block text-2xl font-light hover:text-primary transition-colors">
-                                hello@blackpixel.com
+                                studioblackpixel3d@gmail.com
                             </a>
                             <p className="text-text-muted">
-                                123 Architecture Ave,<br />
-                                Design District, NY 10001
+                                Surat Digital Vally,<br />
+                                Mota Varachha, Surat, Gujarat, 394101
                             </p>
                         </div>
                     </div>
