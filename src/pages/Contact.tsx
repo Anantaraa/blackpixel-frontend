@@ -109,7 +109,7 @@ const Contact: React.FC = () => {
                             </p>
 
                             <div className="mt-16 space-y-6">
-                                <a href="mailto:hello@blackpixel.com" className="block text-2xl text-text hover:text-primary transition-colors">hello@blackpixel.com</a>
+                                <a href="mailto:studio@blackpixel3d.com" className="block text-2xl text-text hover:text-primary transition-colors">studio@blackpixel3d.com</a>
                                 <a href="tel:+919106990329" className="block text-2xl text-text hover:text-primary transition-colors">+91 91069 90329</a>
                             </div>
                         </div>
