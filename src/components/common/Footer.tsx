@@ -51,21 +51,14 @@ const Footer: React.FC = () => {
                         <h3 className="text-sm font-mono text-text-muted mb-6 uppercase tracking-wider">Socials</h3>
                         <ul className="space-y-4">
                             <li>
-                                <a href="#" className="flex items-center gap-2 group hover:text-primary transition-colors">
+                                <a href="https://www.instagram.com/blackpixel_3d" className="flex items-center gap-2 group hover:text-primary transition-colors">
                                     <Instagram size={20} />
                                     <span>Instagram</span>
                                     <ArrowUpRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                                 </a>
                             </li>
                             <li>
-                                <a href="#" className="flex items-center gap-2 group hover:text-primary transition-colors">
-                                    <Twitter size={20} />
-                                    <span>Twitter</span>
-                                    <ArrowUpRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#" className="flex items-center gap-2 group hover:text-primary transition-colors">
+                                <a href="www.linkedin.com/in/jenulvachhani-blackpixel3d" className="flex items-center gap-2 group hover:text-primary transition-colors">
                                     <Linkedin size={20} />
                                     <span>LinkedIn</span>
                                     <ArrowUpRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -78,8 +71,8 @@ const Footer: React.FC = () => {
                     <div>
                         <h3 className="text-sm font-mono text-text-muted mb-6 uppercase tracking-wider">Contact</h3>
                         <div className="space-y-4">
-                            <a href="mailto:hello@blackpixel.com" className="block text-2xl font-light hover:text-primary transition-colors">
-                                studioblackpixel3d@gmail.com
+                            <a href="mailto:studio@blackpixel3d.com" className="block text-2xl font-light hover:text-primary transition-colors">
+                                studio@blackpixel3d.com
                             </a>
                             <p className="text-text-muted">
                                 Surat Digital Vally,<br />

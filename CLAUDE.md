@@ -47,9 +47,15 @@ Database tables: `projects`, `hero_slides`, `categories`. Gallery images are sto
 
 ## Styling & Theming
 
-- Tailwind CSS with custom CSS variables for theming (`--color-primary`, `--color-neutral`, etc.)
-- Dark/light mode uses `ThemeContext` (`src/context/ThemeContext.tsx`) which toggles a `.dark` class on `<html>` and uses the **View Transition API** for smooth theme switching animations
+- Tailwind CSS with custom CSS variables for theming. The config maps CSS variables to Tailwind color tokens:
+  - `primary`, `primaryDark`, `secondary` — brand colors
+  - `neutral` / `neutral-card` / `neutral-border` — backgrounds and borders
+  - `text` / `text-muted` — typography
+  - `surface` — elevated surface color
+- Font families: `font-sans` → Inter, `font-display` → Outfit. Custom `text-display-{1,2,3}` sizes for large headings.
+- Dark/light mode uses `ThemeContext` (`src/context/ThemeContext.tsx`) which toggles a `.dark` class on `<html>` and uses the **View Transition API** for a radial-clip-path animation originating from the click point
 - Utility: `src/utils/cn.ts` wraps `clsx` + `tailwind-merge` for conditional class names — use this instead of string concatenation
+- Icons: **Lucide React** (`lucide-react`) is used throughout
 
 ## Animations
 
@@ -69,3 +75,5 @@ Database tables: `projects`, `hero_slides`, `categories`. Gallery images are sto
 - `src/data/mockData.ts` — mock project data (used as fallback/dev reference)
 - `src/services/api.ts` — legacy Strapi client, not actively used
 - No Redux/Zustand — React Context + hooks only
+- `ProjectLightbox` deduplicates images by combining `project.image` (main) with `project.gallery[].url`, de-duped via `Set`
+- `useProjects` normalizes gallery data on fetch — handles legacy `string[]` rows, stringified JSON objects, and current `{url, featured}` objects
