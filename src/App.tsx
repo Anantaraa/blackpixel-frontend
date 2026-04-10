@@ -5,6 +5,7 @@ import Contact from './pages/Contact';
 import Services from './pages/Services';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
+import MeCard from './pages/MeCard';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
 // ... imports
@@ -30,6 +31,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/me/:slug" element={<MeCard />} />
           </Routes>
         </div>
       </Router>

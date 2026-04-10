@@ -1,10 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 import ThemeToggle from './ThemeToggle';
 
 const Navigation: React.FC = () => {
+  const { pathname } = useLocation();
+  if (pathname.startsWith('/me')) return null;
 
     const links = [
         { name: 'Services', path: '/services' },

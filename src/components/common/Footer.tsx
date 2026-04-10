@@ -1,8 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Instagram, Linkedin, ArrowUpRight } from 'lucide-react';
 
 const Footer: React.FC = () => {
+    const { pathname } = useLocation();
+    if (pathname.startsWith('/me')) return null;
+
     const currentYear = new Date().getFullYear();
 
     return (
