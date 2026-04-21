@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjects } from '../hooks/useProjects';
 import type { Project, ProjectImage } from '../hooks/useProjects';
-import { uploadToCloudinary } from '../utils/cloudinary';
+import { uploadImage, uploadMultipleImages } from '../lib/storage';
 import { supabase } from '../utils/supabase';
 import { HeroSlidesManager } from '../components/admin/HeroSlidesManager';
 
@@ -50,9 +50,12 @@ const Admin = () => {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        if (file.size > 10 * 1024 * 1024) { alert('Must be under 10 MB.'); return; }
+        if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) { alert('Unsupported type.'); return; }
+
         try {
             setIsUploading(true);
-            const url = await uploadToCloudinary(file);
+            const { url } = await uploadImage(file, 'blackpixel/projects');
             setFormData(prev => ({ ...prev, image: url }));
         } catch (err: any) {
             alert('Upload failed: ' + err.message);
@@ -79,28 +82,27 @@ const Admin = () => {
 
         try {
             setIsUploading(true);
-            const newImages: { url: string; featured: boolean }[] = [];
-            for (let i = 0; i < files.length; i++) {
-                console.log(`Uploading file ${i}...`);
-                const url = await uploadToCloudinary(files[i]);
-                console.log(`File ${i} uploaded. URL:`, url);
+            const fileArray = Array.from(files);
 
-                if (!url) {
-                    console.error(`Upload returned empty URL for file ${i}`);
-                    continue;
-                }
-
-                newImages.push({ url, featured: false });
+            if (fileArray.some(f => f.size > 10 * 1024 * 1024)) {
+                alert('One or more files exceed 10 MB.');
+                return;
             }
-            console.log('New images to add:', newImages);
-            setFormData(prev => {
-                const updated = { ...prev, gallery: [...prev.gallery, ...newImages] };
-                console.log('Updated formData gallery:', updated.gallery);
-                return updated;
-            });
+            if (fileArray.some(f => !['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(f.type))) {
+                alert('Unsupported file type. Use JPEG, PNG, WebP, or AVIF.');
+                return;
+            }
+
+            const { results, errors } = await uploadMultipleImages(fileArray, 'blackpixel/projects');
+
+            if (errors.length > 0) {
+                alert(`${errors.length} file(s) failed to upload: ${errors.map(e => e.error).join(', ')}`);
+            }
+
+            const newImages = results.map(r => ({ url: r.url, featured: false }));
+            setFormData(prev => ({ ...prev, gallery: [...prev.gallery, ...newImages] }));
         } catch (err: any) {
-            console.error('Gallery Upload error:', err);
-            alert('Gallery Upload failed: ' + err.message);
+            alert('Gallery upload failed: ' + err.message);
         } finally {
             setIsUploading(false);
         }
