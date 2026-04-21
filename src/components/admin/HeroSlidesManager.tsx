@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useHeroSlides } from '../../hooks/useHeroSlides';
-import { uploadToCloudinary } from '../../utils/cloudinary';
+import { uploadImage } from '../../lib/storage';
 import { Trash2, Plus } from 'lucide-react';
 
 export const HeroSlidesManager: React.FC = () => {
@@ -15,9 +15,12 @@ export const HeroSlidesManager: React.FC = () => {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        if (file.size > 10 * 1024 * 1024) { alert('Must be under 10 MB.'); return; }
+        if (!['image/jpeg', 'image/png', 'image/webp', 'image/avif'].includes(file.type)) { alert('Unsupported type.'); return; }
+
         try {
             setIsUploading(true);
-            const url = await uploadToCloudinary(file);
+            const { url } = await uploadImage(file, 'blackpixel/projects');
             setNewSlideImage(url);
         } catch (err: any) {
             alert('Upload failed: ' + err.message);
