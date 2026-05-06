@@ -27,6 +27,10 @@ const Admin = () => {
     const [formData, setFormData] = useState(initialForm);
     const [isFormOpen, setIsFormOpen] = useState(false);
 
+    const hasCloudinaryUrl = (project: Project) =>
+        project.image?.includes('cloudinary.com') ||
+        project.gallery?.some(img => img.url?.includes('cloudinary.com'));
+
     const handleSignOut = async () => {
         await supabase.auth.signOut();
         navigate('/login');
@@ -222,10 +226,10 @@ const Admin = () => {
                                         <tr key={project.id} className="border-b hover:bg-gray-50">
                                             <td className="p-4">
                                                 <div className="flex -space-x-4">
-                                                    <img src={project.image} alt={project.title} className="w-16 h-16 object-cover rounded border-2 border-white relative z-10" />
+                                                    <img src={project.image} alt={project.title} className="w-16 h-16 object-cover rounded border-2 border-white relative z-10 bg-gray-100" onError={e => { e.currentTarget.style.display = 'none'; }} />
                                                     {project.gallery?.slice(0, 3).map((img, i) => (
                                                         <div key={i} className="relative" style={{ zIndex: 9 - i }}>
-                                                            <img src={img.url} alt="" className="w-16 h-16 object-cover rounded border-2 border-white" />
+                                                            <img src={img.url} alt="" className="w-16 h-16 object-cover rounded border-2 border-white bg-gray-100" onError={e => { e.currentTarget.style.display = 'none'; }} />
                                                             {img.featured && (
                                                                 <div className="absolute top-0 right-0 w-3 h-3 bg-yellow-400 rounded-full border border-white" title="Featured Image"></div>
                                                             )}
@@ -238,7 +242,14 @@ const Admin = () => {
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="p-4 font-medium">{project.title} {project.featured && '⭐'}</td>
+                                            <td className="p-4 font-medium">
+                                                {project.title} {project.featured && '⭐'}
+                                                {hasCloudinaryUrl(project) && (
+                                                    <span className="ml-2 text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full" title="Some images still on Cloudinary — re-upload needed">
+                                                        ⚠ Cloudinary
+                                                    </span>
+                                                )}
+                                            </td>
                                             <td className="p-4 font-mono">{project.display_order}</td>
                                             <td className="p-4">{project.categories?.name || 'Uncategorized'}</td>
                                             <td className="p-4">{project.location}</td>
@@ -269,6 +280,12 @@ const Admin = () => {
                     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                         <div className="bg-white p-8 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                             <h2 className="text-2xl font-bold mb-6">{editingId ? 'Edit Project' : 'New Project'}</h2>
+
+                            {(formData.image?.includes('cloudinary.com') || formData.gallery?.some(img => img.url?.includes('cloudinary.com'))) && (
+                                <div className="mb-4 p-3 bg-orange-50 border border-orange-200 rounded text-sm text-orange-800">
+                                    <strong>⚠ Cloudinary images detected.</strong> These images may not load if Cloudinary is unavailable. Re-upload them using the file inputs below to move them to S3.
+                                </div>
+                            )}
 
                             <form onSubmit={handleSubmit} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">

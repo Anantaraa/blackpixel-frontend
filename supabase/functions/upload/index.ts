@@ -83,7 +83,9 @@ Deno.serve(async (req: Request) => {
     });
 
     const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 });
-    const publicUrl = `https://${Deno.env.get('CLOUDFRONT_DOMAIN')}/${key}`;
+    const domain = (Deno.env.get('CLOUDFRONT_DOMAIN') ?? '').trim();
+    if (!domain) return json({ error: 'CLOUDFRONT_DOMAIN not configured' }, 500);
+    const publicUrl = `https://${domain}/${key}`;
 
     return json({ uploadUrl, key, publicUrl });
   } catch (err: unknown) {

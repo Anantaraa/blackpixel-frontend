@@ -158,8 +158,9 @@ const FeaturedProjects: React.FC = () => {
 // Separate component to handle per-item scroll parallax logic
 // Separate component to handle per-item scroll parallax logic
 const ProjectItem: React.FC<{ project: any, imageUrl: string, onClick: () => void }> = ({ project, imageUrl, onClick }) => {
-    // Parallax removed to ensure 100% image visibility (no cropping) as requested.
-    // Standard Masonry behavior: Width fits column, Height is dynamic based on aspect ratio.
+    const [imgError, setImgError] = useState(false);
+
+    if (imgError) return null;
 
     return (
         <div
@@ -173,6 +174,7 @@ const ProjectItem: React.FC<{ project: any, imageUrl: string, onClick: () => voi
                     alt={project.title}
                     className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02] will-change-transform"
                     loading="lazy"
+                    onError={() => setImgError(true)}
                 />
             </div>
 
