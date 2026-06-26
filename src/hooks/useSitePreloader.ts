@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 
-const MIN_DISPLAY_MS = 5000;
-
 function loadImg(url: string): Promise<void> {
     return new Promise(resolve => {
         const img = new Image();
@@ -18,7 +16,6 @@ export function useSitePreloader() {
 
     useEffect(() => {
         let cancelled = false;
-        const t0 = Date.now();
 
         async function run() {
             try {
@@ -69,12 +66,6 @@ export function useSitePreloader() {
                             })
                         )
                     );
-                }
-
-                // Enforce a minimum display time so the loader feels intentional
-                const elapsed = Date.now() - t0;
-                if (elapsed < MIN_DISPLAY_MS) {
-                    await new Promise(r => setTimeout(r, MIN_DISPLAY_MS - elapsed));
                 }
 
                 if (!cancelled) setReady(true);
