@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useHeroSlides } from '../../hooks/useHeroSlides';
 
-const PIXEL_SIZE = 36;
+const PIXEL_SIZE = 20;
 const STEP_MS = 40;    // ms per column base advance (left-to-right)
 const JITTER_MS = 90;  // max random per-pixel offset — breaks the hard column edge
 const BLACK_MS = 80;  // how long each pixel stays black — controls flood width
