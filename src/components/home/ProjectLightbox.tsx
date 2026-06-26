@@ -136,6 +136,27 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                             />
                         )}
 
+                        {/* Dot indicators */}
+                        {allImages.length > 1 && (
+                            <div
+                                className="absolute bottom-20 md:bottom-24 left-1/2 -translate-x-1/2 z-[90] flex items-center gap-2"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {allImages.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => setCurrentImageIndex(i)}
+                                        aria-label={`Go to image ${i + 1}`}
+                                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                                            i === currentImageIndex
+                                                ? 'w-6 bg-white'
+                                                : 'w-1.5 bg-white/40 hover:bg-white/70'
+                                        }`}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
                         {/* Image navigation — visible click zones with hint arrows */}
                         {allImages.length > 1 && (
                             <>
