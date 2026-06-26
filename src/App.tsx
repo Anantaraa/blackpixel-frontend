@@ -11,6 +11,8 @@ import Login from './pages/Login';
 import MeCard from './pages/MeCard';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { ThemeProvider } from './context/ThemeContext';
+import SiteLoader from './components/common/SiteLoader';
+import { useSitePreloader } from './hooks/useSitePreloader';
 
 function AppRoutes() {
   const location = useLocation();
@@ -37,6 +39,18 @@ function AppRoutes() {
 }
 
 function App() {
+  const { progress, ready } = useSitePreloader();
+
+  // Lock scroll while loading so nothing jumps underneath the loader
+  useEffect(() => {
+    if (!ready) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [ready]);
+
   useEffect(() => {
     const lenis = new Lenis();
     let rafId: number;
@@ -53,6 +67,7 @@ function App() {
 
   return (
     <ThemeProvider>
+      <SiteLoader progress={progress} visible={!ready} />
       <Router>
         <div className="min-h-screen bg-neutral">
           <AppRoutes />
