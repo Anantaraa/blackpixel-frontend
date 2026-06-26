@@ -73,7 +73,7 @@ const HeroSlider: React.FC = () => {
             return;
         }
 
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d')!;
         if (!ctx) {
             isTransRef.current = false;
             setIsTransitioning(false);
