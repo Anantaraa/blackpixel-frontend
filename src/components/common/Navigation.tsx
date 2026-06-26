@@ -5,14 +5,20 @@ import { motion } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 
 const Navigation: React.FC = () => {
-  const { pathname } = useLocation();
-  if (pathname.startsWith('/me')) return null;
+    const { pathname } = useLocation();
+    if (pathname.startsWith('/me')) return null;
 
     const links = [
+        { name: 'Projects', path: '/#projects' },
         { name: 'Services', path: '/services' },
         { name: 'Studio', path: '/about' },
         { name: 'Contact', path: '/contact' },
     ];
+
+    const isActive = (path: string) => {
+        if (path === '/#projects') return pathname === '/';
+        return pathname === path || pathname.startsWith(path + '/');
+    };
 
     return (
         <>
@@ -38,14 +44,18 @@ const Navigation: React.FC = () => {
                         <Link
                             key={link.name}
                             to={link.path}
-                            className="px-3 py-2 md:px-6 md:py-3 rounded-full text-xs md:text-sm font-medium text-text-muted hover:text-text hover:bg-neutral transition-all duration-300"
+                            className={`px-3 py-2 md:px-6 md:py-3 rounded-full text-xs md:text-sm font-medium transition-all duration-300 ${
+                                isActive(link.path)
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'text-text-muted hover:text-text hover:bg-neutral'
+                            }`}
                         >
                             {link.name}
                         </Link>
                     ))}
                     <Link
                         to="/contact"
-                        className="ml-1 md:ml-2 px-4 py-2 md:px-6 md:py-3 rounded-full bg-text text-surface text-xs md:text-sm font-bold whitespace-nowrap hover:scale-105 transition-transform"
+                        className="ml-1 md:ml-2 px-4 py-2 md:px-6 md:py-3 rounded-full bg-text text-surface text-xs md:text-sm font-bold whitespace-nowrap hover:bg-primary hover:text-white transition-all duration-300"
                     >
                         Let's Talk
                     </Link>

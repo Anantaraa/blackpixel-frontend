@@ -18,27 +18,31 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [isDetailsVisible, setIsDetailsVisible] = useState(false);
 
-    // Reset image index and details visibility when project changes
     useEffect(() => {
         setCurrentImageIndex(0);
         setIsDetailsVisible(false);
     }, [project]);
 
-    // Deduplicate images
     const allImages = project
         ? Array.from(new Set([project.image, ...(project.gallery?.map(g => g.url) || [])].filter(Boolean)))
         : [];
 
-    // Handlers for image sliding
     const handleNextImage = () => {
-        setCurrentImageIndex(prev => (prev + 1) % allImages.length);
+        if (currentImageIndex < allImages.length - 1) {
+            setCurrentImageIndex(prev => prev + 1);
+        } else {
+            onNext();
+        }
     };
 
     const handlePrevImage = () => {
-        setCurrentImageIndex(prev => (prev - 1 + allImages.length) % allImages.length);
+        if (currentImageIndex > 0) {
+            setCurrentImageIndex(prev => prev - 1);
+        } else {
+            onPrev();
+        }
     };
 
-    // Lock body scroll when lightbox is open
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -50,18 +54,17 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
         };
     }, [isOpen]);
 
-    // Keyboard navigation
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (!isOpen) return;
             if (e.key === 'Escape') onClose();
-            if (e.key === 'ArrowRight') onNext();
-            if (e.key === 'ArrowLeft') onPrev();
+            if (e.key === 'ArrowRight') handleNextImage();
+            if (e.key === 'ArrowLeft') handlePrevImage();
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose, onNext, onPrev]);
+    }, [isOpen, onClose, currentImageIndex, allImages.length]);
 
     if (!project) return null;
 
@@ -72,82 +75,91 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-surface/75 p-4 md:p-8"
-                    onClick={onClose} // Close when clicking backdrop
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-surface/80 backdrop-blur-sm"
+                    onClick={onClose}
                 >
-                    {/* Master Close Button */}
+                    {/* Close Button */}
                     <button
                         onClick={onClose}
                         className="fixed top-4 right-4 md:top-6 md:right-6 z-[140] w-12 h-12 flex items-center justify-center bg-text/10 hover:bg-text/20 text-text/70 hover:text-text rounded-full transition-colors backdrop-blur-md"
-                        title="Close Project"
+                        aria-label="Close"
                     >
-                        <X size={24} />
+                        <X size={20} />
                     </button>
 
-                    {/* External Navigation Arrows & Previews (Project Level) */}
+                    {/* Project Navigation — left edge */}
                     <div
                         className="fixed left-2 md:left-6 top-1/2 -translate-y-1/2 z-[130] flex flex-col items-start gap-2 group cursor-pointer"
                         onClick={(e) => { e.stopPropagation(); onPrev(); }}
+                        aria-label="Previous project"
                     >
-                        <div className="p-3 text-text/50 hover:text-text transition-all group-hover:scale-110 group-hover:-translate-x-1">
-                            <ChevronLeft className="w-7 h-7 md:w-12 md:h-12" />
+                        <div className="p-3 text-text/40 hover:text-text/80 transition-all group-hover:scale-110 group-hover:-translate-x-1">
+                            <ChevronLeft className="w-6 h-6 md:w-10 md:h-10" />
                         </div>
                         {prevProject && (
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-full mt-2 left-0 w-48 pointer-events-none bg-surface/60 backdrop-blur-md p-3 rounded-lg border border-text/10">
-                                <p className="text-[10px] text-text/60 uppercase tracking-widest mb-1">Previous Project</p>
-                                <p className="text-sm text-text font-medium truncate drop-shadow-md">{prevProject.title}</p>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-full mt-2 left-0 w-48 pointer-events-none bg-surface/80 backdrop-blur-md p-3 rounded-lg border border-text/10">
+                                <p className="text-[10px] text-text/50 uppercase tracking-widest mb-1">Previous Project</p>
+                                <p className="text-sm text-text font-medium truncate">{prevProject.title}</p>
                             </div>
                         )}
                     </div>
 
+                    {/* Project Navigation — right edge */}
                     <div
                         className="fixed right-2 md:right-6 top-1/2 -translate-y-1/2 z-[130] flex flex-col items-end gap-2 group cursor-pointer"
                         onClick={(e) => { e.stopPropagation(); onNext(); }}
+                        aria-label="Next project"
                     >
-                        <div className="p-3 text-text/50 hover:text-text transition-all group-hover:scale-110 group-hover:translate-x-1">
-                            <ChevronRight className="w-7 h-7 md:w-12 md:h-12" />
+                        <div className="p-3 text-text/40 hover:text-text/80 transition-all group-hover:scale-110 group-hover:translate-x-1">
+                            <ChevronRight className="w-6 h-6 md:w-10 md:h-10" />
                         </div>
                         {nextProject && (
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-full mt-2 right-0 w-48 text-right pointer-events-none bg-surface/60 backdrop-blur-md p-3 rounded-lg border border-text/10">
-                                <p className="text-[10px] text-text/60 uppercase tracking-widest mb-1">Next Project</p>
-                                <p className="text-sm text-text font-medium truncate drop-shadow-md">{nextProject.title}</p>
+                            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-full mt-2 right-0 w-48 text-right pointer-events-none bg-surface/80 backdrop-blur-md p-3 rounded-lg border border-text/10">
+                                <p className="text-[10px] text-text/50 uppercase tracking-widest mb-1">Next Project</p>
+                                <p className="text-sm text-text font-medium truncate">{nextProject.title}</p>
                             </div>
                         )}
                     </div>
 
-                    {/* Fullscreen Image Container */}
-                    <div className="fixed inset-0 z-[80] flex items-center justify-center pointer-events-none">
-                        {allImages.length > 1 && (
-                            <>
-                                <div
-                                    className="fixed left-0 top-0 bottom-0 w-1/2 z-[90] cursor-w-resize pointer-events-auto"
-                                    onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
-                                    title="Previous Image"
-                                />
-                                <div
-                                    className="fixed right-0 top-0 bottom-0 w-1/2 z-[90] cursor-e-resize pointer-events-auto"
-                                    onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
-                                    title="Next Image"
-                                />
-                            </>
-                        )}
+                    {/* Image area */}
+                    <div className="fixed inset-0 z-[80] flex items-center justify-center">
                         {allImages.length > 0 && (
                             <motion.img
                                 key={`${project.id}-img-${currentImageIndex}`}
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.4 }}
+                                initial={{ opacity: 0, scale: 0.98 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.35 }}
                                 src={allImages[currentImageIndex]}
-                                alt={`${project.title} - Image ${currentImageIndex + 1}`}
-                                className="max-w-full max-h-[100vh] object-contain pointer-events-auto"
+                                alt={`${project.title} — image ${currentImageIndex + 1} of ${allImages.length}`}
+                                className="max-w-full max-h-[100vh] object-contain"
+                                onClick={(e) => e.stopPropagation()}
                             />
+                        )}
+
+                        {/* Image navigation — visible click zones with hint arrows */}
+                        {allImages.length > 1 && (
+                            <>
+                                <button
+                                    className="absolute left-16 md:left-20 top-1/2 -translate-y-1/2 z-[90] w-12 h-12 flex items-center justify-center bg-black/30 hover:bg-black/50 text-white/70 hover:text-white rounded-full transition-all duration-200 backdrop-blur-sm"
+                                    onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                                    aria-label="Previous image"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+                                <button
+                                    className="absolute right-16 md:right-20 top-1/2 -translate-y-1/2 z-[90] w-12 h-12 flex items-center justify-center bg-black/30 hover:bg-black/50 text-white/70 hover:text-white rounded-full transition-all duration-200 backdrop-blur-sm"
+                                    onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                                    aria-label="Next image"
+                                >
+                                    <ChevronRight size={20} />
+                                </button>
+                            </>
                         )}
                     </div>
 
-                    {/* Floating Details Pane Container */}
+                    {/* Floating Details Pane */}
                     <div className="fixed bottom-0 left-0 right-0 z-[120] pointer-events-none flex flex-col justify-end">
 
-                        {/* The Expanded Background (Open State - desktop only) */}
                         {isDetailsVisible && (
                             <motion.div
                                 layoutId="dynamic-pane-bg"
@@ -159,23 +171,20 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                         <div className="relative z-10 w-full px-4 md:px-12 py-6 md:py-8 lg:py-10">
                             <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-center">
 
-                                {/* Left Side: Category, Title, Location */}
                                 <div className="w-full md:w-1/3 shrink-0 flex flex-col pointer-events-none z-10 relative">
-
-                                    {/* Category - Always visible, placed just above the Title */}
                                     <motion.span
                                         layout
-                                        className="w-fit inline-block px-3 py-1 mb-2 text-[10px] md:text-xs bg-surface/50 backdrop-blur-md rounded-full text-text/80 uppercase tracking-widest font-semibold border border-text/10 shadow-sm"
+                                        className="w-fit inline-block px-3 py-1 mb-2 text-xs bg-surface/60 backdrop-blur-md rounded-full text-text/80 uppercase tracking-widest font-semibold border border-text/10 shadow-sm"
                                     >
                                         {project.categories?.name || 'Project'}
                                     </motion.span>
 
-                                    {/* The Pill / Button Wrapper */}
+                                    {/* Info pill — larger touch target */}
                                     <button
                                         onClick={(e) => { e.stopPropagation(); setIsDetailsVisible(!isDetailsVisible); }}
-                                        className="relative flex items-center gap-2 lg:gap-4 pointer-events-auto group text-left px-3 py-1.5 lg:px-4 lg:py-3 -ml-3 lg:-ml-4 w-fit max-w-[calc(100vw-2rem)] outline-none"
+                                        className="relative flex items-center gap-3 pointer-events-auto group text-left py-2 px-3 -ml-3 w-fit max-w-[calc(100vw-2rem)] outline-none"
+                                        aria-label={isDetailsVisible ? 'Hide project details' : 'Show project details'}
                                     >
-                                        {/* The Pill Background (Closed State) */}
                                         {!isDetailsVisible && (
                                             <motion.div
                                                 layoutId="dynamic-pane-bg"
@@ -185,34 +194,30 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                                             />
                                         )}
 
-                                        {/* Icon Button Inside Pill */}
-                                        <motion.div layout className="relative z-10 w-5 h-5 lg:w-10 lg:h-10 shrink-0 flex items-center justify-center border border-text text-text rounded-full shadow-sm group-hover:scale-105 transition-all overflow-hidden bg-transparent">
+                                        <motion.div layout className="relative z-10 w-8 h-8 shrink-0 flex items-center justify-center border border-text text-text rounded-full group-hover:border-primary group-hover:text-primary transition-colors overflow-hidden">
                                             <AnimatePresence mode="wait">
                                                 {isDetailsVisible ? (
                                                     <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                                                        <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                                        <X className="w-4 h-4" />
                                                     </motion.div>
                                                 ) : (
                                                     <motion.div key="info" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                                                        <Info className="w-3.5 h-3.5 md:w-4 md:h-4" />
+                                                        <Info className="w-4 h-4" />
                                                     </motion.div>
                                                 )}
                                             </AnimatePresence>
                                         </motion.div>
 
-                                        {/* Title */}
-                                        <motion.h2 layout className="relative z-10 text-[10px] lg:text-[15px] font-display font-bold text-text leading-none tracking-tight drop-shadow-sm pr-3 lg:pr-4 pt-1 whitespace-nowrap">
+                                        <motion.h2 layout className="relative z-10 text-sm lg:text-base font-display font-bold text-text leading-none tracking-tight drop-shadow-sm pr-3 lg:pr-4 whitespace-nowrap">
                                             {project.title}
                                         </motion.h2>
                                     </button>
 
-                                    {/* Location */}
-                                    <motion.p layout className="text-text/70 text-xs md:text-sm font-mono tracking-wider mt-4 uppercase drop-shadow-sm">
+                                    <motion.p layout className="text-text/60 text-xs md:text-sm font-mono tracking-wider mt-3 uppercase drop-shadow-sm">
                                         {project.location} • {project.year}
                                     </motion.p>
                                 </div>
 
-                                {/* Fading Side Content (Open State Only) */}
                                 <AnimatePresence>
                                     {isDetailsVisible && (
                                         <motion.div
@@ -222,16 +227,14 @@ const ProjectLightbox: React.FC<ProjectLightboxProps> = ({ project, nextProject,
                                             transition={{ duration: 0.4, delay: 0.1 }}
                                             className="w-full md:w-2/3 flex flex-col md:flex-row flex-wrap gap-6 md:gap-12 items-start md:items-center pointer-events-auto"
                                         >
-                                            {/* Description */}
                                             {project.description && (
-                                                <div className="hidden lg:block flex-1 text-sm md:text-base text-text/70 leading-relaxed font-light mt-2 md:mt-0 max-w-2xl">
+                                                <div className="hidden lg:block flex-1 text-sm md:text-base text-text/70 leading-relaxed font-light max-w-2xl">
                                                     <p>{project.description}</p>
                                                 </div>
                                             )}
 
-                                            {/* Pagination */}
                                             {allImages.length > 1 && (
-                                                <div className="shrink-0 flex items-center justify-end w-full md:w-auto mt-4 md:mt-0">
+                                                <div className="shrink-0 flex items-center gap-3">
                                                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-text/5 rounded-full border border-text/10 backdrop-blur-sm">
                                                         <span className="text-text/60 font-mono text-sm tracking-widest">
                                                             {currentImageIndex + 1} / {allImages.length}

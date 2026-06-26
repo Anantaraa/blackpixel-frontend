@@ -17,12 +17,17 @@ No test infrastructure is present.
 
 **Stack:** React 19 + TypeScript + Vite + Tailwind CSS 3 + React Router v7
 
-**Backend:** Supabase (PostgreSQL + auth). All data access is via direct Supabase client calls inside custom hooks — there is no API abstraction layer. Cloudinary is used for image uploads/delivery.
+**Backend:** Supabase (PostgreSQL + auth). All data access is via direct Supabase client calls inside custom hooks — there is no API abstraction layer.
 
-**Key environment variables** (Vite-prefixed):
-- `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` — required
-- `VITE_CLOUDINARY_CLOUD_NAME` / `VITE_CLOUDINARY_PRESET` — required for image uploads
-- `VITE_STRAPI_URL` / `VITE_API_TOKEN` — legacy, not actively used
+**Image uploads:** `src/lib/storage.ts` calls a Supabase Edge Function (`/functions/v1/upload`) which returns a pre-signed S3 URL. The client PUTs directly to S3; served via CloudFront CDN. Some legacy project data still contains Cloudinary URLs — `Admin.tsx` detects these by checking for `cloudinary.com` in the URL.
+
+**Deployment:** Vercel with a catch-all SPA rewrite (`vercel.json`).
+
+**Key environment variables:**
+- `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` — required for all Supabase access
+- `CLOUDFRONT_DOMAIN` — CloudFront CDN domain for image delivery (used in edge function, not exposed to frontend)
+- `AWS_REGION` / `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_S3_BUCKET` — used only by the Supabase Edge Function, not by frontend code
+- `VITE_CLOUDINARY_CLOUD_NAME` / `VITE_CLOUDINARY_PRESET` — legacy, kept for backward compatibility with existing Cloudinary URLs in the DB
 
 ## Routing
 
@@ -33,9 +38,12 @@ No test infrastructure is present.
 /contact   → Contact page
 /login     → Supabase email/password auth
 /admin     → Protected CMS dashboard (Projects + Hero Slides tabs)
+/me/:slug  → MeCard — public digital business card for a team member
 ```
 
 `ProtectedRoute` (`src/components/common/ProtectedRoute.tsx`) wraps `/admin` — checks `supabase.auth.getSession()` and redirects unauthenticated users to `/login`.
+
+`MeCard` is completely standalone (own design tokens, no shared theme) and reads from the `team` table via `src/utils/actions.ts:getTeamMemberBySlug`.
 
 ## Data Layer
 
@@ -43,7 +51,13 @@ Custom hooks in `src/hooks/` handle all Supabase CRUD:
 - `useProjects.ts` — projects table with categories join, gallery image management
 - `useHeroSlides.ts` — hero_slides table for carousel management
 
-Database tables: `projects`, `hero_slides`, `categories`. Gallery images are stored as JSON objects `{url, featured}` within the projects table.
+Database tables: `projects`, `hero_slides`, `categories`, `team`. Gallery images are stored as JSON objects `{url, featured}` within the projects table.
+
+SQL schema files in the repo root: `schema.sql`, `hero_slides.sql`, `fix_rls.sql`.
+
+Supabase Edge Functions in `supabase/functions/`:
+- `upload/` — generates pre-signed S3 PUT URL, returns CloudFront public URL
+- `send-contact-email/` — handles contact form submissions
 
 ## Styling & Theming
 
@@ -66,12 +80,13 @@ Database tables: `projects`, `hero_slides`, `categories`. Gallery images are sto
 ## Admin CMS
 
 `/admin` contains a tab-based CMS:
-- **Projects tab**: full CRUD with Cloudinary image uploads, gallery management (main image + gallery with featured flags), display order, and category assignment
+- **Projects tab**: full CRUD with S3 image uploads (via `src/lib/storage.ts`), gallery management (main image + gallery with featured flags), display order, and category assignment
 - **Hero Slides tab**: managed via `HeroSlidesManager` component
 
 ## Notable Patterns
 
-- `src/utils/cloudinary.ts` — handles image uploads to Cloudinary before saving URLs to Supabase
+- `src/lib/storage.ts` — image upload to S3 via Supabase Edge Function; includes retry logic and validates MIME type + 10 MB max size
+- `src/utils/actions.ts` — direct Supabase queries not tied to a hook (currently: `getTeamMemberBySlug`)
 - `src/data/mockData.ts` — mock project data (used as fallback/dev reference)
 - `src/services/api.ts` — legacy Strapi client, not actively used
 - No Redux/Zustand — React Context + hooks only

@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useProjects } from '../../hooks/useProjects';
 import type { Project } from '../../hooks/useProjects';
 import ProjectLightbox from './ProjectLightbox';
+import { fadeUp, scaleReveal } from '../../utils/animations';
+
+interface DisplayItem {
+    id: string;
+    project: Project;
+    imageUrl: string;
+}
 
 const FeaturedProjects: React.FC = () => {
     const { projects, loading } = useProjects();
-
-    // Filter only featured projects if needed, or show all. 
-    // User said "incremental height based on number of projects uploaded which are featured".
-    // Let's assume we show ALL projects that are marked 'featured' in DB.
-    // Or just all projects if 'featured' flag isn't strictly used yet. 
-    // The Admin panel allows setting 'featured'. Let's trust the DB sort.
-
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
@@ -27,123 +28,97 @@ const FeaturedProjects: React.FC = () => {
 
     const handleNext = () => {
         if (!selectedProject) return;
-        const currentIndex = projects.findIndex(p => p.id === selectedProject.id);
-        const nextIndex = (currentIndex + 1) % projects.length;
-        setSelectedProject(projects[nextIndex]);
+        const idx = projects.findIndex(p => p.id === selectedProject.id);
+        setSelectedProject(projects[(idx + 1) % projects.length]);
     };
 
     const handlePrev = () => {
         if (!selectedProject) return;
-        const currentIndex = projects.findIndex(p => p.id === selectedProject.id);
-        const prevIndex = (currentIndex - 1 + projects.length) % projects.length;
-        setSelectedProject(projects[prevIndex]);
+        const idx = projects.findIndex(p => p.id === selectedProject.id);
+        setSelectedProject(projects[(idx - 1 + projects.length) % projects.length]);
     };
 
-    // Flatten projects into a list of "Featured Items"
-    // Each item represents an image to be displayed.
-    // Logic:
-    // 1. If project.featured is true -> Include Main Image
-    // 2. Include any gallery image where img.featured is true
-    interface DisplayItem {
-        id: string; // unique combo
-        project: Project;
-        imageUrl: string;
-        isMain: boolean;
-    }
-
-    const [displayItems, setDisplayItems] = useState<DisplayItem[]>([]);
-
-    useEffect(() => {
+    const displayItems: DisplayItem[] = projects.flatMap(p => {
         const items: DisplayItem[] = [];
-        projects.forEach(p => {
-            // Main Image
-            // User requested all projects effectively featured. 
-            // So we show Main Image for ALL projects (if it exists).
-            if (p.image) {
-                items.push({
-                    id: `${p.id}-main`,
-                    project: p,
-                    imageUrl: p.image,
-                    isMain: true
-                });
-            }
-            // Gallery Images
-            if (p.gallery && Array.isArray(p.gallery)) {
-                p.gallery.forEach((img, idx) => {
-                    // Check if img has featured property (normalized in useProjects)
-                    if (img.featured) {
-                        items.push({
-                            id: `${p.id}-gallery-${idx}`,
-                            project: p,
-                            imageUrl: img.url,
-                            isMain: false
-                        });
-                    }
-                });
-            }
+        if (p.image) items.push({ id: `${p.id}-main`, project: p, imageUrl: p.image });
+        p.gallery?.forEach((img, idx) => {
+            if (img.featured) items.push({ id: `${p.id}-gallery-${idx}`, project: p, imageUrl: img.url });
         });
-
-        // Sort items? For now, keep project order, then main, then gallery.
-        // Or specific shuffle? User didn't request shuffle.
-        // Re-sorting by project display_order is implicit since projects are sorted.
-        setDisplayItems(items);
-    }, [projects]);
-
-
-    // Masonry Column Calculation
-    const [columns, setColumns] = useState<DisplayItem[][]>([]);
-
-    useEffect(() => {
-        const calculateColumns = () => {
-            const width = window.innerWidth;
-            let numCols = 1;
-            if (width >= 1024) numCols = 4;      // Reduced from 5 to 4 to give images more room if we have many.
-            else if (width >= 768) numCols = 3;  // md
-            else if (width >= 640) numCols = 2;  // sm
-
-            // Distribute items
-            const newCols: DisplayItem[][] = Array.from({ length: numCols }, () => []);
-            displayItems.forEach((item, i) => {
-                newCols[i % numCols].push(item);
-            });
-            setColumns(newCols);
-        };
-
-        calculateColumns();
-        window.addEventListener('resize', calculateColumns);
-        return () => window.removeEventListener('resize', calculateColumns);
-    }, [displayItems]);
+        return items;
+    });
 
     if (loading && projects.length === 0) {
-        return <div className="py-20 text-center text-text">Loading Projects...</div>;
+        return (
+            <section className="bg-neutral text-text" id="projects">
+                <div className="py-10 md:py-16 px-4 md:px-6 mb-4">
+                    <div className="flex items-end justify-between border-b border-neutral-border pb-6">
+                        <div>
+                            <div className="h-3 w-16 bg-neutral-border rounded mb-3 animate-pulse" />
+                            <div className="h-12 w-64 bg-neutral-border rounded animate-pulse" />
+                        </div>
+                    </div>
+                </div>
+                <div className="w-full px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-2">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="break-inside-avoid mb-2">
+                            <div
+                                className="w-full bg-neutral-card animate-pulse rounded-lg"
+                                style={{ height: `${200 + (i % 3) * 80}px` }}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </section>
+        );
     }
 
     return (
         <section className="bg-neutral text-text" id="projects">
-            <div className="py-10 md:py-20 mb-4 md:mb-8 text-center bg-neutral">
-                <h2 className="text-4xl md:text-6xl font-display font-medium uppercase tracking-tight">
-                    Selected Works
-                </h2>
-            </div>
+            {/* Section Header */}
+            <motion.div
+                className="py-10 md:py-16 px-4 md:px-6 mb-4"
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: '-60px' }}
+            >
+                <div className="flex items-end justify-between border-b border-neutral-border pb-6">
+                    <div>
+                        <p className="text-xs uppercase tracking-widest text-primary mb-3 font-medium">Portfolio</p>
+                        <h2 className="text-4xl md:text-6xl font-display font-medium tracking-tighter text-text">
+                            Selected Works
+                        </h2>
+                    </div>
+                    {projects.length > 0 && (
+                        <p className="text-text-muted text-sm hidden md:block pb-1">
+                            {projects.length} project{projects.length !== 1 ? 's' : ''}
+                        </p>
+                    )}
+                </div>
+            </motion.div>
 
-            {/* Masonry Layout */}
-            <div className="w-full px-4 flex gap-2 items-start">
-                {columns.map((col, colIndex) => (
-                    <div key={colIndex} className="flex flex-col gap-2 flex-1">
-                        {col.map((item) => (
+            {/* CSS Masonry — each card fades up independently as it enters the viewport */}
+            <div className="w-full px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-2">
+                {displayItems.map((item) => (
+                    <div key={item.id} className="break-inside-avoid mb-2">
+                        <motion.div
+                            variants={scaleReveal}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, margin: '-40px' }}
+                        >
                             <ProjectItem
-                                key={item.id}
-                                project={item.project} // Pass project for title/category
-                                imageUrl={item.imageUrl} // Pass specific image
-                                onClick={() => openLightbox(item.project)} // Lightbox opens project context
+                                project={item.project}
+                                imageUrl={item.imageUrl}
+                                onClick={() => openLightbox(item.project)}
                             />
-                        ))}
+                        </motion.div>
                     </div>
                 ))}
             </div>
 
             <ProjectLightbox
-                project={selectedProject as any} // Temporary cast until Lightbox is updated
+                project={selectedProject}
                 nextProject={selectedProject ? projects[(projects.findIndex(p => p.id === selectedProject.id) + 1) % projects.length] : null}
                 prevProject={selectedProject ? projects[(projects.findIndex(p => p.id === selectedProject.id) - 1 + projects.length) % projects.length] : null}
                 isOpen={isLightboxOpen}
@@ -155,42 +130,66 @@ const FeaturedProjects: React.FC = () => {
     );
 };
 
-// Separate component to handle per-item scroll parallax logic
-// Separate component to handle per-item scroll parallax logic
-const ProjectItem: React.FC<{ project: any, imageUrl: string, onClick: () => void }> = ({ project, imageUrl, onClick }) => {
+const ProjectItem: React.FC<{ project: Project; imageUrl: string; onClick: () => void }> = ({ project, imageUrl, onClick }) => {
     const [imgError, setImgError] = useState(false);
 
     if (imgError) return null;
 
     return (
-        <div
-            className="break-inside-avoid group relative overflow-hidden cursor-pointer rounded-lg" // Removed bg-neutral-900 and mb-4
+        <motion.div
+            className="group relative overflow-hidden cursor-pointer rounded-lg"
             onClick={onClick}
+            whileHover="hover"
+            initial="rest"
         >
-            {/* Image Container */}
-            <div className="relative w-full h-auto">
-                <img
+            <div className="relative w-full h-auto overflow-hidden">
+                <motion.img
                     src={imageUrl}
                     alt={project.title}
-                    className="w-full h-auto block object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02] will-change-transform"
+                    className="w-full h-auto block object-cover will-change-transform"
                     loading="lazy"
                     onError={() => setImgError(true)}
+                    variants={{
+                        rest: { scale: 1 },
+                        hover: { scale: 1.04, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
+                    }}
                 />
             </div>
 
             {/* Hover Overlay */}
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-500 z-10">
-                <div className="absolute bottom-6 left-6 right-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100">
-                    <span className="inline-block px-2 py-1 mb-2 text-[10px] bg-white/10 backdrop-blur-md rounded-full text-white/90 uppercase tracking-widest shadow-sm">
+            <motion.div
+                className="absolute inset-0 z-10"
+                variants={{
+                    rest: { backgroundColor: 'rgba(0,0,0,0)' },
+                    hover: { backgroundColor: 'rgba(0,0,0,0.4)', transition: { duration: 0.4 } },
+                }}
+            >
+                <motion.div
+                    className="absolute bottom-6 left-6 right-6"
+                    variants={{
+                        rest: { opacity: 0, y: 12 },
+                        hover: { opacity: 1, y: 0, transition: { duration: 0.4, delay: 0.05 } },
+                    }}
+                >
+                    <span className="inline-block px-2 py-1 mb-2 text-[10px] bg-white/10 backdrop-blur-md rounded-full text-white/90 uppercase tracking-widest shadow-sm border border-white/10">
                         {project.categories?.name || 'Project'}
                     </span>
                     <h3 className="text-xl font-display font-medium text-white leading-tight drop-shadow-md">
                         {project.title}
                     </h3>
-                </div>
-            </div>
-        </div>
+                </motion.div>
+            </motion.div>
+
+            {/* Amber accent line — sweeps in from left on hover */}
+            <motion.div
+                className="absolute bottom-0 left-0 h-[2px] bg-primary"
+                variants={{
+                    rest: { scaleX: 0, originX: 0 },
+                    hover: { scaleX: 1, originX: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+                }}
+            />
+        </motion.div>
     );
-}
+};
 
 export default FeaturedProjects;

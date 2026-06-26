@@ -29,6 +29,7 @@ export default {
             fontFamily: {
                 sans: ['Inter', 'sans-serif'],
                 display: ['Outfit', 'sans-serif'],
+                heading: ['Outfit', 'sans-serif'],
             },
             fontSize: {
                 'display-1': ['7rem', { lineHeight: '0.9', letterSpacing: '-0.04em' }],
