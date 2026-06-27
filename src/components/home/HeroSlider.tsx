@@ -1,10 +1,68 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useHeroSlides } from '../../hooks/useHeroSlides';
 
-const PIXEL_SIZE = 20;
-const STEP_MS = 40;    // ms per column base advance (left-to-right)
-const JITTER_MS = 90;  // max random per-pixel offset — breaks the hard column edge
-const BLACK_MS = 80;  // how long each pixel stays black — controls flood width
+const PIXEL_SIZE = 16;
+const TOTAL_MS   = 100; // all styles complete within this window
+const JITTER_MS  = 1500;   // small organic jitter added to each pixel
+const BLACK_MS   = 100;   // how long each pixel stays black before revealing new image
+
+type TransitionStyle =
+    | 'dissolve'     // random scatter across whole frame
+    | 'leftRight'    // sweep left → right
+    | 'rightLeft'    // sweep right → left
+    | 'topBottom'    // sweep top → bottom
+    | 'diagonal'     // diagonal line top-left → bottom-right
+    | 'antiDiag'     // diagonal line bottom-left → top-right
+    | 'radialCorner' // circular arc from top-left corner
+    | 'radialCenter' // circular bloom from centre outward
+    | 'cornersIn';   // all 4 corners fire first, centre fires last
+
+const STYLES: TransitionStyle[] = [
+    'dissolve', 'leftRight', 'rightLeft', 'topBottom',
+    'diagonal', 'antiDiag', 'radialCorner', 'radialCenter', 'cornersIn',
+];
+
+function blackAt(
+    style: TransitionStyle,
+    c: number, r: number,
+    cols: number, rows: number,
+): number {
+    const j = Math.random() * JITTER_MS;
+
+    if (style === 'dissolve') return Math.random() * (TOTAL_MS + JITTER_MS);
+
+    let norm = 0; // 0..1 — normalized position in the transition wave
+    switch (style) {
+        case 'leftRight':    norm = c / (cols - 1); break;
+        case 'rightLeft':    norm = (cols - 1 - c) / (cols - 1); break;
+        case 'topBottom':    norm = r / (rows - 1); break;
+        case 'diagonal':     norm = (c + r) / (cols - 1 + rows - 1); break;
+        case 'antiDiag':     norm = (cols - 1 - c + r) / (cols - 1 + rows - 1); break;
+        case 'radialCorner': {
+            const maxD = Math.sqrt((cols - 1) ** 2 + (rows - 1) ** 2);
+            norm = Math.sqrt(c * c + r * r) / maxD;
+            break;
+        }
+        case 'radialCenter': {
+            const dc = c - (cols - 1) / 2, dr = r - (rows - 1) / 2;
+            const maxD = Math.sqrt(((cols - 1) / 2) ** 2 + ((rows - 1) / 2) ** 2);
+            norm = Math.sqrt(dc * dc + dr * dr) / maxD;
+            break;
+        }
+        case 'cornersIn': {
+            const maxD = Math.sqrt(((cols - 1) / 2) ** 2 + ((rows - 1) / 2) ** 2);
+            const d = Math.min(
+                Math.sqrt(c ** 2 + r ** 2),
+                Math.sqrt((cols - 1 - c) ** 2 + r ** 2),
+                Math.sqrt(c ** 2 + (rows - 1 - r) ** 2),
+                Math.sqrt((cols - 1 - c) ** 2 + (rows - 1 - r) ** 2),
+            );
+            norm = Math.min(d / maxD, 1);
+            break;
+        }
+    }
+    return norm * TOTAL_MS + j;
+}
 
 function drawCoverWithTint(
     ctx: CanvasRenderingContext2D,
@@ -98,6 +156,9 @@ const HeroSlider: React.FC = () => {
         // so this change is invisible to the viewer
         setCurrentIndex(nextIdx);
 
+        // Pick a random transition style for this slide change
+        const style = STYLES[Math.floor(Math.random() * STYLES.length)];
+
         // Build pixel grid
         const cols = Math.ceil(W / PIXEL_SIZE) + 1;
         const rows = Math.ceil(H / PIXEL_SIZE) + 1;
@@ -112,8 +173,7 @@ const HeroSlider: React.FC = () => {
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const i = r * cols + c;
-                // Column index is the base, random jitter spreads each pixel independently
-                const ba = c * STEP_MS + Math.random() * JITTER_MS;
+                const ba = blackAt(style, c, r, cols, rows);
                 blackAts[i] = ba;
                 clearAts[i] = ba + BLACK_MS;
                 if (clearAts[i] > maxClearAt) maxClearAt = clearAts[i];
