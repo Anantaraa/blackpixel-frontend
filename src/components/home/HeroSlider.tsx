@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useHeroSlides } from '../../hooks/useHeroSlides';
 
-const PIXEL_SIZE = 16;
+const PIXEL_SIZE = 4;
 const TOTAL_MS   = 100; // all styles complete within this window
 const JITTER_MS  = 1500;   // small organic jitter added to each pixel
 const BLACK_MS   = 100;   // how long each pixel stays black before revealing new image
